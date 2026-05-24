@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Account Settings · KPoin POS</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  body {
+    height: 100vh;
+    overflow: hidden;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 232px 1fr;
+    height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: #fff;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 14px;
+    height: 100%;
+  }
+  .side-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 10px 22px;
+    font-weight: 700; font-size: 16px; letter-spacing: -0.01em;
+  }
+  .side-logo .logo-mark {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--brand-500); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px;
+  }
+  .nav-section-label {
+    padding: 12px 12px 6px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    color: var(--gray-400); text-transform: uppercase;
+    margin-top: 10px;
+  }
+  .nav-section-label:first-of-type {
+    margin-top: 0;
+  }
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: var(--gray-700);
+    font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    transition: background 120ms, color 120ms;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--gray-50); color: var(--gray-900); }
+  .nav-item .nav-icon { width: 20px; height: 20px; flex-shrink: 0; }
+  .nav-item.active {
+    background: var(--brand-50);
+    color: var(--brand-700);
+    font-weight: 600;
+  }
+  .nav-item.active .nav-icon { color: var(--brand-500); }
+
+  .side-spacer { flex: 1; }
+
+  .side-user {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 10px; border-radius: var(--r-md);
+    cursor: pointer;
+    transition: background 120ms;
+    background: var(--brand-50);
+    border: 1px solid var(--brand-100);
+  }
+  .side-user:hover { background: var(--brand-100); }
+  .side-user .avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-600) 100%);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+  }
+  .side-user .who { flex: 1; min-width: 0; }
+  .side-user .name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+  .side-user .role { font-size: 11px; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ---------- Main Panels ---------- */
+  .main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 24px 32px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .main-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+  }
+  .main-head .title h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--gray-900);
+  }
+  .main-head .title .sub {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 4px;
+  }
+
+  .content-container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 24px;
+    overflow: auto;
+    padding-bottom: 20px;
+  }
+
+  .settings-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: fit-content;
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 4px 0;
+  }
+  .card-subtitle {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin: 0 0 16px 0;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-grid .full-width {
+    grid-column: span 2;
+  }
+
+  .pref-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--gray-25);
+  }
+  .pref-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pref-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-800);
+  }
+  .pref-desc {
+    font-size: 11px;
+    color: var(--gray-500);
+  }
+
+  /* Toggle switch style */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--gray-300);
+    transition: .2s;
+    border-radius: 24px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .2s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  input:checked + .slider {
+    background-color: var(--brand-500);
+  }
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+
+  .action-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--gray-25);
+  }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(40px);
+    background: #111827; color: #fff;
+    padding: 12px 18px; border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 500; font-size: 13px;
+    opacity: 0; pointer-events: none;
+    transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms;
+    z-index: 2000;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .toast .icon { color: var(--success-500); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ Sidebar ============ -->
+  <aside class="sidebar" id="nav">
+    <div class="side-logo">
+      <div class="logo-mark">K</div>
+<span>KPoin</span>
+    </div>
+
+    <div class="sidebar-nav-scroll scroll">
+    <div class="nav-section-label">Main Section</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Order" onclick="window.location.href='order.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        Order
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Products & Inventory" onclick="window.location.href='inventory.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+          <line x1="12" y1="22.08" x2="12" y2="12" />
+        </svg>
+        Products & Inventory
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Customer" onclick="window.location.href='customer.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        Customer
+      </div>
+    </nav>
+
+    <div class="nav-section-label">Reports Section</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Summary Report" onclick="window.location.href='report-summary.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+        Summary Report
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Detail Report" onclick="window.location.href='report-detail.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <line x1="9" y1="3" x2="9" y2="21" />
+          <line x1="15" y1="3" x2="15" y2="21" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="3" y1="15" x2="21" y2="15" />
+        </svg>
+        Detail Report
+      </div>
+    </nav>
+
+    <div class="nav-section-label">Finance</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Transaction Details" onclick="window.location.href='finance-transaction.html'">
+        <span class="nav-icon">📋</span> Transaction Details
+      </div>
+      <div class="nav-item" data-screen-label="Nav · P&L Summary" onclick="window.location.href='finance-pl-summary.html'">
+        <span class="nav-icon">💰</span> P&L Summary
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Product Profitability" onclick="window.location.href='finance-product-profit.html'">
+        <span class="nav-icon">📦</span> Product Profitability
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Store Profitability" onclick="window.location.href='finance-store-profit.html'">
+        <span class="nav-icon">🏪</span> Store Profitability
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Cost Analysis" onclick="window.location.href='finance-cost-analysis.html'">
+        <span class="nav-icon">📊</span> Cost Analysis
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Margin Analysis" onclick="window.location.href='finance-margin-analysis.html'">
+        <span class="nav-icon">📈</span> Margin Analysis
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Daily P&L" onclick="window.location.href='finance-daily-pl.html'">
+        <span class="nav-icon">📅</span> Daily P&L
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Finance Config" onclick="window.location.href='finance-config.html'">
+        <span class="nav-icon">⚙️</span> Finance Config
+      </div>
+    </nav>
+
+    <div class="nav-section-label">Config Section</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Promo & Discount" onclick="window.location.href='promo.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="5" x2="5" y2="19" />
+          <circle cx="7.5" cy="7.5" r="2" />
+          <circle cx="16.5" cy="16.5" r="2" />
+        </svg>
+        Promo & Discount
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Store List" onclick="window.location.href='store.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 9.58V21a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9.58" />
+          <path d="M3 3h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+          <path d="M12 9v14" />
+        </svg>
+        Store List
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Staff List" onclick="window.location.href='staff.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        Staff List
+      </div>
+    </nav>
+
+    
+    </div>
+
+
+
+    
+    <div class="side-user">
+      <div class="avatar">SA</div>
+      <div class="who">
+        <div class="name">Super Admin</div>
+        <div class="role">Super Admin · Store #04</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-700)" stroke-width="2.2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    </div>
+  </aside>
+
+  <!-- ============ Main Panel ============ -->
+  <main class="main">
+    <header class="main-head">
+      <div class="title">
+        <h1>Account & Profile Settings</h1>
+        <div class="sub">Set up your personal details, assign store location, change system preferences, and perform administrative actions.</div>
+      </div>
+    </header>
+
+    <div class="content-container scroll">
+      <!-- Left side: Profile Information form -->
+      <section class="settings-card">
+        <div>
+          <h2 class="card-title">Profile Information</h2>
+          <p class="card-subtitle">Manage your credentials, roles, and assigned operational outlet.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="profileName">Full Name</label>
+            <input class="input" id="profileName" type="text" placeholder="e.g. Agus Prasetyo" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="profileEmail">Email Address</label>
+            <input class="input" id="profileEmail" type="email" placeholder="e.g. agus.p@bluepoint.id" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="profileRole">Role</label>
+            <select class="select" id="profileRole">
+              <option value="Super Admin">Super Admin</option>
+              <option value="Admin">Admin</option>
+              <option value="Manager">Manager</option>
+              <option value="Cashier">Cashier</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="profileStore">Assigned Store</label>
+            <select class="select" id="profileStore">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+
+          <div class="field full-width">
+            <label class="field-label" for="profilePhone">Phone Number</label>
+            <input class="input" id="profilePhone" type="text" placeholder="e.g. +62 812-1111-2222" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Right side: Preferences & Actions -->
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <!-- Card: Application Preferences -->
+        <section class="settings-card">
+          <div>
+            <h2 class="card-title">POS Preferences</h2>
+            <p class="card-subtitle">Toggle retail experience settings for this terminal.</p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="pref-item">
+              <div class="pref-info">
+                <span class="pref-label">Auto-Print Receipt</span>
+                <span class="pref-desc">Automatically print receipt after checkout.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="prefAutoPrint" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="pref-item">
+              <div class="pref-info">
+                <span class="pref-label">Sound Feedback</span>
+                <span class="pref-desc">Play confirmation chime on operations.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="prefSound" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Card: System Administration -->
+        <section class="settings-card" style="border-color: var(--danger-100);">
+          <div>
+            <h2 class="card-title" style="color: var(--danger-700);">System Actions</h2>
+            <p class="card-subtitle">Wipe database catalog or log out from current session.</p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Demo reset — only visible in demo mode -->
+            <div class="action-block" id="demoBannerBlock" style="display:none; border-color: rgba(245,158,11,0.35); background: #FFFBEB; border: 1px solid #FCD34D; border-radius: var(--r-lg); padding: 16px;">
+              <span class="pref-label" style="color: #92400E; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:16px;">⚡</span> Demo Mode Active
+              </span>
+              <span class="pref-desc" style="color: #92400E; opacity: 0.85;">Re-seed all demo data back to its original state and reload the app.</span>
+              <button class="btn btn-sm" id="btnResetDemo" style="margin-top: 8px; background: linear-gradient(135deg,#FDE68A,#FCD34D); color:#92400E; border:1px solid #F59E0B; font-weight:700;">
+                🔄 Reset Demo Data
+              </button>
+            </div>
+
+            <div class="action-block" style="border-color: rgba(239, 68, 68, 0.15); background: var(--danger-50);">
+              <span class="pref-label" style="color: var(--danger-700);">Factory Database Reset</span>
+              <span class="pref-desc" style="color: var(--danger-700); opacity: 0.9;">Wipe all transactions, catalog customizations, and re-seed to defaults.</span>
+              <button class="btn btn-danger btn-sm" id="btnFactoryReset" style="margin-top: 8px;">Reset to Factory Defaults</button>
+            </div>
+
+            <div class="action-block">
+              <span class="pref-label">Log Out Session</span>
+              <span class="pref-desc">Deauthorize current terminal and return to login screen.</span>
+              <button class="btn btn-secondary btn-sm" id="btnLogout" style="margin-top: 8px;">Log Out Session</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast">
+  <span class="icon">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </span>
+  <span id="toastMsg">Action completed successfully.</span>
+</div>
+
+<script src="setting-app.js"></script>
+</body>
+</html>

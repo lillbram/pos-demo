@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Transaction Details · KPoin POS</title>
+<meta name="description" content="View all order transactions with financial profit calculations." />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  body {
+    height: 100vh;
+    overflow: hidden;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 232px 1fr;
+    height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: #fff;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 14px;
+    height: 100%;
+  }
+  .side-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 10px 22px;
+    font-weight: 700; font-size: 16px; letter-spacing: -0.01em;
+  }
+  .side-logo .logo-mark {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--brand-500); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px;
+  }
+  .nav-section-label {
+    padding: 12px 12px 6px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    color: var(--gray-400); text-transform: uppercase;
+    margin-top: 10px;
+  }
+  .nav-section-label:first-of-type {
+    margin-top: 0;
+  }
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: var(--gray-700);
+    font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    transition: background 120ms, color 120ms;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--gray-50); color: var(--gray-900); }
+  .nav-item .nav-icon { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .nav-item.active {
+    background: var(--brand-50);
+    color: var(--brand-700);
+    font-weight: 600;
+  }
+  .nav-item.active .nav-icon { color: var(--brand-500); }
+  .nav-item.active:hover { background: var(--brand-50); }
+
+  .side-spacer { flex: 1; }
+
+  .side-user {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 10px; border-radius: var(--r-md);
+    cursor: pointer;
+    transition: background 120ms;
+  }
+  .side-user:hover { background: var(--gray-100); }
+  .side-user .avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-600) 100%);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+  }
+  .side-user .who { flex: 1; min-width: 0; }
+  .side-user .name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+  .side-user .role { font-size: 11px; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ---------- Main Panels ---------- */
+  .main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 24px 32px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .main-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .main-head .title h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--gray-900);
+  }
+  .main-head .title .sub {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 4px;
+  }
+
+  /* ---------- Metrics Bar ---------- */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .metric-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--r-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .metric-info {
+    flex: 1;
+  }
+  .metric-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-500);
+    margin-bottom: 4px;
+  }
+  .metric-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.2;
+  }
+  .metric-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  /* Metric Card Colors */
+  .m-rev .metric-icon-wrapper { background: var(--brand-50); color: var(--brand-600); }
+  .m-cogs .metric-icon-wrapper { background: var(--danger-50); color: var(--danger-500); }
+  .m-gross .metric-icon-wrapper { background: var(--info-50); color: var(--info-500); }
+  .m-net .metric-icon-wrapper { background: var(--success-50); color: var(--success-700); }
+
+  /* ---------- Toolbar / Filters ---------- */
+  .toolbar {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    letter-spacing: 0.05em;
+  }
+  .filter-input {
+    height: 36px;
+    padding: 0 10px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border-strong);
+    background: #fff;
+    font-size: 13px;
+    outline: none;
+  }
+  .filter-input:focus {
+    border-color: var(--brand-500);
+  }
+
+  .actions-group {
+    margin-left: auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  /* ---------- Table Section ---------- */
+  .table-container {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    flex: 1;
+    overflow-y: auto;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+  .table-container::-webkit-scrollbar { width: 8px; }
+  .table-container::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
+  .table-container table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+  }
+  .table-container th {
+    position: sticky;
+    top: 0;
+    background: var(--gray-50);
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--border);
+    z-index: 10;
+    cursor: pointer;
+    user-select: none;
+  }
+  .table-container th:hover {
+    background: var(--gray-100);
+  }
+  .table-container th .sort-icon {
+    font-size: 11px;
+    color: var(--gray-400);
+    margin-left: 4px;
+  }
+  .table-container td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--gray-800);
+    vertical-align: middle;
+  }
+  .table-container tr:last-child td {
+    border-bottom: none;
+  }
+  .table-container tr.main-row {
+    cursor: pointer;
+    transition: background 80ms;
+  }
+  .table-container tr.main-row:hover {
+    background: var(--gray-25);
+  }
+  .table-container tr.main-row.expanded {
+    background: var(--brand-50) !important;
+  }
+  .table-container tr.detail-row {
+    background: var(--gray-25);
+    display: none;
+  }
+  .table-container tr.detail-row.show {
+    display: table-row;
+  }
+  
+  .details-box {
+    padding: 16px 24px;
+    border-radius: var(--r-lg);
+    background: #fff;
+    border: 1px solid var(--border);
+    margin: 8px 16px 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .details-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: var(--gray-900);
+    display: flex;
+    justify-content: space-between;
+  }
+  .details-table {
+    width: 100% !important;
+    border-collapse: collapse;
+    font-size: 12px !important;
+  }
+  .details-table th {
+    background: var(--gray-100) !important;
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    color: var(--gray-600) !important;
+    position: static !important;
+    cursor: default !important;
+  }
+  .details-table td {
+    padding: 10px 12px !important;
+    border-bottom: 1px solid var(--gray-100) !important;
+  }
+
+  /* Badge styling */
+  .p-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .text-right { text-align: right; }
+  .font-mono { font-family: monospace; }
+  
+  /* Toast Notification */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--gray-900); color: #fff; padding: 12px 20px; border-radius: var(--r-lg);
+    display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500;
+    opacity: 0; pointer-events: none; transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms;
+    z-index: 10000; box-shadow: var(--shadow-lg);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ Sidebar ============ -->
+  <aside class="sidebar" id="nav">
+    <div class="side-logo">
+      <div class="logo-mark">K</div>
+<span>KPoin</span>
+    </div>
+
+    <div class="sidebar-nav-scroll scroll">
+    <div class="nav-section-label">Main Section</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Order" onclick="window.location.href='order.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+        Order
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Products & Inventory" onclick="window.location.href='inventory.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+        Products & Inventory
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Customer" onclick="window.location.href='customer.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+        Customer
+      </div>
+    </nav>
+
+    <div class="nav-section-label">Reports Section</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Summary Report" onclick="window.location.href='report-summary.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
+        Summary Report
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Detail Report" onclick="window.location.href='report-detail.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="9" y1="3" x2="9" y2="21" /><line x1="15" y1="3" x2="15" y2="21" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /></svg>
+        Detail Report
+      </div>
+    </nav>
+
+    <div class="nav-section-label">Finance</div>
+    <nav class="nav">
+      <div class="nav-item active" data-screen-label="Nav · Transaction Details" onclick="window.location.href='finance-transaction.html'">
+        <span class="nav-icon">📋</span> Transaction Details
+      </div>
+      <div class="nav-item" data-screen-label="Nav · P&L Summary" onclick="window.location.href='finance-pl-summary.html'">
+        <span class="nav-icon">💰</span> P&L Summary
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Product Profitability" onclick="window.location.href='finance-product-profit.html'">
+        <span class="nav-icon">📦</span> Product Profitability
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Store Profitability" onclick="window.location.href='finance-store-profit.html'">
+        <span class="nav-icon">🏪</span> Store Profitability
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Cost Analysis" onclick="window.location.href='finance-cost-analysis.html'">
+        <span class="nav-icon">📊</span> Cost Analysis
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Margin Analysis" onclick="window.location.href='finance-margin-analysis.html'">
+        <span class="nav-icon">📈</span> Margin Analysis
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Daily P&L" onclick="window.location.href='finance-daily-pl.html'">
+        <span class="nav-icon">📅</span> Daily P&L
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Finance Config" onclick="window.location.href='finance-config.html'">
+        <span class="nav-icon">⚙️</span> Finance Config
+      </div>
+    </nav>
+
+    <div class="nav-section-label">Config Section</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Promo & Discount" onclick="window.location.href='promo.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19" /><circle cx="7.5" cy="7.5" r="2" /><circle cx="16.5" cy="16.5" r="2" /></svg>
+        Promo & Discount
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Store List" onclick="window.location.href='store.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9.58V21a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9.58" /><path d="M3 3h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><path d="M12 9v14" /></svg>
+        Store List
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Staff List" onclick="window.location.href='staff.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+        Staff List
+      </div>
+    </nav>
+
+    
+    </div>
+
+
+
+    
+    <div class="side-user">
+      <div class="avatar">SA</div>
+      <div class="who">
+        <div class="name">Super Admin</div>
+        <div class="role">Super Admin · Store #04</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+    </div>
+  </aside>
+
+  <!-- ============ Main Panel ============ -->
+  <main class="main">
+    <header class="main-head">
+      <div class="title">
+        <h1>📋 Transaction Details</h1>
+        <div class="sub">View detailed transaction-level breakdowns, taxes, COGS, and profits.</div>
+      </div>
+    </header>
+
+    <!-- ============ Metrics Row ============ -->
+    <div class="metrics-grid">
+      <div class="metric-card m-rev">
+        <div class="metric-icon-wrapper">💰</div>
+        <div class="metric-info">
+          <div class="metric-label">Total Revenue</div>
+          <div class="metric-val" id="metricTotalRevenue">Rp 0</div>
+          <div class="metric-sub" id="metricTotalTransactions">0 transactions</div>
+        </div>
+      </div>
+      <div class="metric-card m-cogs">
+        <div class="metric-icon-wrapper">📦</div>
+        <div class="metric-info">
+          <div class="metric-label">Total COGS</div>
+          <div class="metric-val" id="metricTotalCogs">Rp 0</div>
+          <div class="metric-sub" id="metricCogsRatio">0% ratio</div>
+        </div>
+      </div>
+      <div class="metric-card m-gross">
+        <div class="metric-icon-wrapper">📊</div>
+        <div class="metric-info">
+          <div class="metric-label">Gross Profit</div>
+          <div class="metric-val" id="metricGrossProfit">Rp 0</div>
+          <div class="metric-sub" id="metricGrossMargin">0% margin</div>
+        </div>
+      </div>
+      <div class="metric-card m-net">
+        <div class="metric-icon-wrapper">📈</div>
+        <div class="metric-info">
+          <div class="metric-label">Net Profit</div>
+          <div class="metric-val" id="metricNetProfit">Rp 0</div>
+          <div class="metric-sub" id="metricNetMargin">0% margin</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Filters Toolbar ============ -->
+    <div class="toolbar">
+      <div class="filter-group">
+        <div class="filter-label">From Date</div>
+        <input type="date" class="filter-input" id="filterFromDate" value="2026-05-01" />
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">To Date</div>
+        <input type="date" class="filter-input" id="filterToDate" value="2026-05-31" />
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Store</div>
+        <select class="filter-input" id="filterStore">
+          <option value="all">All Stores</option>
+          <option value="Store #01">Store #01</option>
+          <option value="Store #02">Store #02</option>
+          <option value="Store #03">Store #03</option>
+          <option value="Store #04">Store #04</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Payment Method</div>
+        <select class="filter-input" id="filterPayment">
+          <option value="all">All Methods</option>
+          <option value="cash">Cash</option>
+          <option value="card">Card / EDC</option>
+          <option value="qr">QR Code Pay</option>
+          <option value="points">Points Only</option>
+          <option value="split">Split (Points + Cash/Card)</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Promo Applied</div>
+        <select class="filter-input" id="filterPromo">
+          <option value="all">All Transactions</option>
+          <option value="yes">With Promo Only</option>
+          <option value="no">Without Promo Only</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Min Profit (Rp)</div>
+        <input type="number" class="filter-input" id="filterMinProfit" placeholder="Min" />
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Max Profit (Rp)</div>
+        <input type="number" class="filter-input" id="filterMaxProfit" placeholder="Max" />
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Search</div>
+        <input type="text" class="filter-input" id="filterSearch" placeholder="Trans ID / Customer" style="width: 180px;" />
+      </div>
+      <div class="actions-group">
+        <button class="btn btn-secondary btn-sm" id="btnExportCsv">Export CSV</button>
+        <button class="btn btn-secondary btn-sm" id="btnExportPdf">Print / PDF</button>
+      </div>
+    </div>
+
+    <!-- ============ Transactions Table ============ -->
+    <div class="table-container">
+      <table id="transactionsTable">
+        <thead>
+          <tr>
+            <th data-sort="id">Trans ID <span class="sort-icon">⇅</span></th>
+            <th data-sort="date">Time <span class="sort-icon">⇅</span></th>
+            <th data-sort="items">Items <span class="sort-icon">⇅</span></th>
+            <th data-sort="customer">Customer <span class="sort-icon">⇅</span></th>
+            <th data-sort="payment">Payment <span class="sort-icon">⇅</span></th>
+            <th data-sort="subtotal" class="text-right">Subtotal <span class="sort-icon">⇅</span></th>
+            <th data-sort="promo">Promo <span class="sort-icon">⇅</span></th>
+            <th data-sort="tax" class="text-right">Tax <span class="sort-icon">⇅</span></th>
+            <th data-sort="revenue" class="text-right">Revenue <span class="sort-icon">⇅</span></th>
+            <th data-sort="cogs" class="text-right">COGS <span class="sort-icon">⇅</span></th>
+            <th data-sort="profit" class="text-right">Gross Profit <span class="sort-icon">⇅</span></th>
+            <th data-sort="margin" class="text-right">Gross % <span class="sort-icon">⇅</span></th>
+          </tr>
+        </thead>
+        <tbody id="transactionsTableBody">
+          <!-- Rows inserted by JS -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Toast notification element -->
+<div class="toast" id="toast">
+  <span class="icon"></span>
+  <span id="toastMsg">Notification message</span>
+</div>
+
+<!-- Scripts -->
+<script src="order-data.js"></script>
+<script src="finance-transaction-app.js"></script>
+</body>
+</html>

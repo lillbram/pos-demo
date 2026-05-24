@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Staff List · KPoin POS</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  /* ============================================================
+     Settings page — specific layout styles
+     ============================================================ */
+  body {
+    height: 100vh;
+    overflow: hidden;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 232px 1fr;
+    height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: #fff;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 14px;
+    height: 100%;
+  }
+  .side-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 10px 22px;
+    font-weight: 700; font-size: 16px; letter-spacing: -0.01em;
+  }
+  .side-logo .logo-mark {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--brand-500); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px;
+  }
+  .nav-section-label {
+    padding: 12px 12px 6px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    color: var(--gray-400); text-transform: uppercase;
+    margin-top: 10px;
+  }
+  .nav-section-label:first-of-type {
+    margin-top: 0;
+  }
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: var(--gray-700);
+    font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    transition: background 120ms, color 120ms;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--gray-50); color: var(--gray-900); }
+  .nav-item .nav-icon { width: 20px; height: 20px; flex-shrink: 0; }
+  .nav-item .nav-badge {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: var(--brand-100); color: var(--brand-700);
+    font-size: 10px; font-weight: 700;
+    padding: 2px 6px; border-radius: 999px;
+  }
+  .nav-item.active {
+    background: var(--brand-50);
+    color: var(--brand-700);
+    font-weight: 600;
+  }
+  .nav-item.active .nav-icon { color: var(--brand-500); }
+  .nav-item.active:hover { background: var(--brand-50); }
+
+  .side-spacer { flex: 1; }
+
+  .side-user {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 10px; border-radius: var(--r-md);
+    cursor: pointer;
+    transition: background 120ms;
+  }
+  .side-user:hover { background: var(--gray-100); }
+  .side-user .avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-600) 100%);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+  }
+  .side-user .who { flex: 1; min-width: 0; }
+  .side-user .name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+  .side-user .role { font-size: 11px; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ---------- Main Panels ---------- */
+  .main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 24px 32px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .main-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .main-head .title h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--gray-900);
+  }
+  .main-head .title .sub {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 4px;
+  }
+  .main-head .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: var(--r-xs);
+    font-size: 11px;
+    font-weight: 600;
+    background: #FEF3C7;
+    color: #92400E;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 10px;
+  }
+
+  /* ---------- Metrics Grid ---------- */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .metric-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--r-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .metric-info {
+    flex: 1;
+  }
+  .metric-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-500);
+    margin-bottom: 4px;
+  }
+  .metric-val {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.1;
+  }
+
+  /* Metrics Card Colors */
+  .m-stores .metric-icon-wrapper { background: var(--brand-50); color: var(--brand-600); }
+  .m-staff .metric-icon-wrapper { background: var(--success-50); color: var(--success-700); }
+  .m-promos .metric-icon-wrapper { background: var(--info-50); color: var(--info-500); }
+  .m-stocks .metric-icon-wrapper { background: var(--warning-50); color: #B45309; }
+
+  /* ---------- Tabs Layout ---------- */
+  .tabs-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+  }
+  .tabs-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .tab-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .search-wrapper {
+    position: relative;
+    flex: 1;
+    width: 280px;
+  }
+  .search-wrapper .icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--gray-400); display: flex; align-items: center;
+  }
+  .search-wrapper .input {
+    padding-left: 40px;
+    height: 40px;
+  }
+
+  /* ---------- Table Grid & Directory ---------- */
+  .table-container {
+    flex: 1;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: auto;
+  }
+  .promo-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+  }
+  .promo-table th {
+    background: var(--gray-50);
+    padding: 14px 20px;
+    font-weight: 600;
+    color: var(--gray-600);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .promo-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--gray-800);
+  }
+  .promo-table tbody tr {
+    transition: background-color 100ms;
+  }
+  .promo-table tbody tr:hover {
+    background-color: var(--gray-50);
+  }
+  .col-staff {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .col-staff .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--brand-50);
+    color: var(--brand-700);
+    font-weight: 700;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .col-staff .name {
+    font-weight: 600;
+    color: var(--gray-900);
+  }
+  .btn-edit, .btn-delete {
+    padding: 6px;
+    border-radius: var(--r-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 120ms, color 120ms;
+    cursor: pointer;
+  }
+  .btn-edit { color: var(--brand-600); margin-right: 4px; }
+  .btn-edit:hover { background: var(--brand-50); }
+  .btn-delete { color: var(--danger-600); }
+  .btn-delete:hover { background: var(--danger-50); }
+
+  .store-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .store-chip-badge {
+    background: var(--brand-50);
+    color: var(--brand-700);
+    padding: 2px 8px;
+    border-radius: var(--r-full);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* ---------- Modals & Scrims ---------- */
+  .scrim {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(17, 24, 39, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 180ms ease;
+    z-index: 1000;
+  }
+  .scrim.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal-wrapper {
+    background: #fff;
+    border-radius: var(--r-xl);
+    width: 100%;
+    max-width: 480px;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(20px);
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .scrim.show .modal-wrapper {
+    transform: translateY(0);
+  }
+  .modal-head {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-head h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.01em;
+  }
+  .modal-body {
+    max-height: 65vh;
+  }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(40px);
+    background: #111827; color: #fff;
+    padding: 12px 18px; border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 500; font-size: 13px;
+    opacity: 0; pointer-events: none;
+    transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms;
+    z-index: 2000;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .toast .icon { color: var(--success-500); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ Sidebar ============ -->
+  <aside class="sidebar" id="nav">
+    <div class="side-logo">
+      <div class="logo-mark">K</div>
+<span>KPoin</span>
+    </div>
+
+    <div class="sidebar-nav-scroll scroll">
+    <div class="nav-section-label">Main Section</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Order" onclick="window.location.href='order.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        Order
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Products & Inventory" onclick="window.location.href='inventory.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+          <line x1="12" y1="22.08" x2="12" y2="12" />
+        </svg>
+        Products & Inventory
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Customer" onclick="window.location.href='customer.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        Customer
+      </div>
+    </nav>
+
+    <div class="nav-section-label">Reports Section</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Summary Report" onclick="window.location.href='report-summary.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+        Summary Report
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Detail Report" onclick="window.location.href='report-detail.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <line x1="9" y1="3" x2="9" y2="21" />
+          <line x1="15" y1="3" x2="15" y2="21" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="3" y1="15" x2="21" y2="15" />
+        </svg>
+        Detail Report
+      </div>
+    </nav>
+
+    <div class="nav-section-label">Finance</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Transaction Details" onclick="window.location.href='finance-transaction.html'">
+        <span class="nav-icon">📋</span> Transaction Details
+      </div>
+      <div class="nav-item" data-screen-label="Nav · P&L Summary" onclick="window.location.href='finance-pl-summary.html'">
+        <span class="nav-icon">💰</span> P&L Summary
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Product Profitability" onclick="window.location.href='finance-product-profit.html'">
+        <span class="nav-icon">📦</span> Product Profitability
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Store Profitability" onclick="window.location.href='finance-store-profit.html'">
+        <span class="nav-icon">🏪</span> Store Profitability
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Cost Analysis" onclick="window.location.href='finance-cost-analysis.html'">
+        <span class="nav-icon">📊</span> Cost Analysis
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Margin Analysis" onclick="window.location.href='finance-margin-analysis.html'">
+        <span class="nav-icon">📈</span> Margin Analysis
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Daily P&L" onclick="window.location.href='finance-daily-pl.html'">
+        <span class="nav-icon">📅</span> Daily P&L
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Finance Config" onclick="window.location.href='finance-config.html'">
+        <span class="nav-icon">⚙️</span> Finance Config
+      </div>
+    </nav>
+
+    <div class="nav-section-label">Config Section</div>
+    <nav class="nav">
+      <div class="nav-item" data-screen-label="Nav · Promo & Discount" onclick="window.location.href='promo.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="5" x2="5" y2="19" />
+          <circle cx="7.5" cy="7.5" r="2" />
+          <circle cx="16.5" cy="16.5" r="2" />
+        </svg>
+        Promo & Discount
+      </div>
+      <div class="nav-item" data-screen-label="Nav · Store List" onclick="window.location.href='store.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 9.58V21a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9.58" />
+          <path d="M3 3h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+          <path d="M12 9v14" />
+        </svg>
+        Store List
+      </div>
+      <div class="nav-item active" data-screen-label="Nav · Staff List" onclick="window.location.href='staff.html'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        Staff List
+      </div>
+    </nav>
+
+    
+    </div>
+
+
+
+    
+    <div class="side-user">
+      <div class="avatar">SA</div>
+      <div class="who">
+        <div class="name">Super Admin</div>
+        <div class="role">Super Admin · Store #04</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    </div>
+  </aside>
+
+  <!-- ============ Main Panel ============ -->
+  <main class="main">
+    <header class="main-head">
+      <div class="title">
+        <h1 style="display: flex; align-items: center; gap: 8px;">
+          Staff List
+          <span class="role-badge">Super Admin Mode</span>
+        </h1>
+        <div class="sub">Manage your store managers, cashiers, and store coverage assignments.</div>
+      </div>
+    </header>
+
+    <!-- ============ Metrics Grid ============ -->
+    <section class="metrics-grid">
+      <!-- Total Staff Card -->
+      <div class="metric-card m-staff">
+        <div class="metric-card-help" tabindex="0" data-tooltip="Total number of registered store managers, cashiers, and administration staff members">?</div>
+        <div class="metric-icon-wrapper" style="background: var(--brand-50); color: var(--brand-600);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="metric-info">
+          <div class="metric-label">Total All Staff</div>
+          <div class="metric-val" id="metricTotalStaff">0</div>
+        </div>
+      </div>
+
+      <!-- Active Staff Card -->
+      <div class="metric-card m-staff-active">
+        <div class="metric-card-help" tabindex="0" data-tooltip="Number of registered staff members who are currently active in the system">?</div>
+        <div class="metric-icon-wrapper" style="background: var(--success-50); color: var(--success-700);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="metric-info">
+          <div class="metric-label">Active Staff</div>
+          <div class="metric-val" id="metricActiveStaff">0</div>
+        </div>
+      </div>
+
+      <!-- Inactive Staff Card -->
+      <div class="metric-card m-staff-inactive">
+        <div class="metric-card-help" tabindex="0" data-tooltip="Number of staff members currently deactivated and unable to access the system">?</div>
+        <div class="metric-icon-wrapper" style="background: var(--gray-100); color: var(--gray-600);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        </div>
+        <div class="metric-info">
+          <div class="metric-label">Inactive Staff</div>
+          <div class="metric-val" id="metricInactiveStaff">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Tabs & Actions ============ -->
+    <div class="tabs-container">
+      <div class="tabs-bar">
+        <h2 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--gray-900);">Staff Directory</h2>
+      </div>
+
+      <div class="tabs-actions">
+        <!-- Staff Search/Filters -->
+        <div id="staffToolbar" class="tab-toolbar">
+          <div class="search-wrapper">
+            <span class="icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input class="input" id="staffSearchInput" placeholder="Search staff..." />
+          </div>
+          <button class="btn btn-primary" id="openAddStaffBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Staff
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Tabs Content Areas ============ -->
+    <!-- Tab 2: Staff Table Directory -->
+    <div class="table-container" id="staffContainer">
+      <table class="promo-table" id="staffTable">
+        <thead>
+          <tr>
+            <th>Staff Member</th>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Assigned Stores</th>
+            <th>Status</th>
+            <th style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="staffTableBody">
+          <!-- Dynamic staff rows -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- ============ MODALS & DIALOGS ============ -->
+
+<!-- Modal C: Add/Edit Staff Modal -->
+<div class="scrim" id="staffModalScrim">
+  <div class="modal-wrapper" style="max-width: 520px;">
+    <div class="modal-head">
+      <h3 id="staffModalTitle">Add Staff</h3>
+      <button class="btn btn-ghost btn-sm btn-icon" id="closeStaffModalBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body scroll" style="padding: 24px; display: flex; flex-direction: column; gap: 16px; max-height: 70vh;">
+      <div class="field-error" id="staffModalError" style="display: none; padding: 10px; border-radius: var(--r-sm); background: var(--danger-50); border: 1px solid rgba(239, 68, 68, 0.2);"></div>
+      <input type="hidden" id="staffModalId" />
+      
+      <div class="field">
+        <label class="field-label" for="staffModalName">Full Name</label>
+        <input class="input" id="staffModalName" placeholder="e.g. Sarah Connor" />
+      </div>
+      
+      <div class="field">
+        <label class="field-label" for="staffModalRole">Role</label>
+        <select class="select" id="staffModalRole">
+          <option value="Admin">Admin</option>
+          <option value="Manager">Manager</option>
+          <option value="Cashier">Cashier</option>
+        </select>
+      </div>
+      
+      <div class="field">
+        <label class="field-label" for="staffModalEmail">Email</label>
+        <input class="input" id="staffModalEmail" type="email" placeholder="e.g. sarah@bluepoint.com" />
+      </div>
+      
+      <div class="field">
+        <label class="field-label" for="staffModalPhone">Phone Number</label>
+        <input class="input" id="staffModalPhone" placeholder="e.g. +1 415-555-0155" />
+      </div>
+      
+      <div class="field">
+        <label class="field-label">Assigned Stores</label>
+        <div id="staffModalStoresContainer" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 4px;">
+          <!-- Store checkboxes will be generated dynamically -->
+        </div>
+      </div>
+      
+      <div class="field" style="margin-top: 4px;">
+        <label class="field-label" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+          <input type="checkbox" id="staffModalStatusToggle" checked style="width: 16px; height: 16px; margin: 0; cursor: pointer; accent-color: var(--brand-500);" />
+          Active Staff Member
+        </label>
+        <span class="field-hint">If disabled, this staff member is marked inactive and will show as inactive in the list.</span>
+      </div>
+    </div>
+    <div class="modal-foot" style="padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px;">
+      <button class="btn btn-secondary" id="cancelStaffModalBtn">Cancel</button>
+      <button class="btn btn-primary" id="submitStaffModalBtn">Save Staff</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast element -->
+<div class="toast" id="toast">
+  <span class="icon">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </span>
+  <span id="toastMsg">Action completed successfully.</span>
+</div>
+
+<script src="store-staff-app.js"></script>
+</body>
+</html>

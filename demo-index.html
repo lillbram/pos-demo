@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KPoin POS — Live Demo</title>
+<meta name="description" content="Explore KPoin POS with pre-loaded demo data. No signup required." />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #0d0f1a;
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- Animated background ---- */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(61,85,204,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(42,58,146,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 60% 30%, rgba(94,118,214,0.18) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    gap: 0;
+  }
+
+  /* ---- Demo Banner ---- */
+  .demo-banner {
+    background: linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.08) 100%);
+    border: 1px solid rgba(245,158,11,0.4);
+    border-radius: 999px;
+    padding: 6px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #FCD34D;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+    animation: fadeSlideDown 0.5s ease both;
+  }
+  .demo-banner .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #F59E0B;
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.75); }
+  }
+
+  /* ---- Logo ---- */
+  .logo-row {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    animation: fadeSlideDown 0.5s 0.05s ease both;
+  }
+  .logo-mark {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #5E76D6 0%, #3D55CC 50%, #2A3A92 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 800; color: #fff;
+    box-shadow: 0 8px 24px rgba(61,85,204,0.5);
+  }
+  .logo-name {
+    font-size: 28px; font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.65) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ---- Hero ---- */
+  .hero-title {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    text-align: center;
+    max-width: 640px;
+    margin: 0 0 16px;
+    animation: fadeSlideDown 0.5s 0.1s ease both;
+  }
+  .hero-title span {
+    background: linear-gradient(135deg, #7B9EF5 0%, #5E76D6 50%, #B8C8FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: 17px;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    max-width: 480px;
+    line-height: 1.65;
+    margin: 0 0 40px;
+    animation: fadeSlideDown 0.5s 0.15s ease both;
+  }
+
+  /* ---- CTA Buttons ---- */
+  .cta-group {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    animation: fadeSlideDown 0.5s 0.2s ease both;
+    width: 100%;
+    max-width: 360px;
+  }
+  .btn-demo {
+    width: 100%;
+    height: 56px;
+    border-radius: 14px;
+    border: none; cursor: pointer;
+    font-family: inherit;
+    font-size: 16px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+  }
+  .btn-demo:active { transform: translateY(1px); }
+
+  .btn-launch {
+    background: linear-gradient(135deg, #5E76D6 0%, #3D55CC 100%);
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(61,85,204,0.45), 0 2px 8px rgba(61,85,204,0.25);
+  }
+  .btn-launch:hover {
+    background: linear-gradient(135deg, #6B82DC 0%, #4A62D5 100%);
+    box-shadow: 0 8px 32px rgba(61,85,204,0.55), 0 2px 10px rgba(61,85,204,0.3);
+  }
+
+  .btn-login {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: none;
+    font-size: 14px;
+    height: 44px;
+  }
+  .btn-login:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+  }
+
+  /* Loading state */
+  #btnLaunch.loading {
+    opacity: 0.8;
+    pointer-events: none;
+  }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .btn-demo.loading .spinner { display: block; }
+  .btn-demo.loading .btn-text { display: none; }
+
+  /* ---- Feature chips ---- */
+  .feature-chips {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    justify-content: center;
+    margin-top: 36px;
+    animation: fadeSlideDown 0.5s 0.25s ease both;
+    max-width: 560px;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1);
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 0.01em;
+  }
+  .chip .icon { font-size: 14px; }
+
+  /* ---- Disclaimer ---- */
+  .disclaimer {
+    margin-top: 40px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.28);
+    text-align: center;
+    line-height: 1.6;
+    animation: fadeSlideDown 0.5s 0.3s ease both;
+  }
+
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Demo Badge -->
+  <div class="demo-banner">
+    <span class="dot"></span>
+    Interactive Demo Environment
+  </div>
+
+  <!-- Logo -->
+  <div class="logo-row">
+    <div class="logo-mark">K</div>
+    <div class="logo-name">KPoin POS</div>
+  </div>
+
+  <!-- Hero -->
+  <h1 class="hero-title">
+    Explore a fully-loaded<br>
+    <span>Point of Sale system</span>
+  </h1>
+  <p class="hero-sub">
+    Try every feature — orders, inventory, finance, reports — with realistic pre-seeded data. No account needed.
+  </p>
+
+  <!-- CTA -->
+  <div class="cta-group">
+    <button class="btn-demo btn-launch" id="btnLaunch">
+      <span class="btn-text" style="display:flex; align-items:center; gap:10px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        Launch Demo
+      </span>
+      <span class="spinner"></span>
+    </button>
+
+  </div>
+
+  <!-- Feature chips -->
+  <div class="feature-chips">
+    <span class="chip"><span class="icon">🛒</span> Live Orders</span>
+    <span class="chip"><span class="icon">📦</span> Inventory</span>
+    <span class="chip"><span class="icon">👥</span> Customers &amp; Points</span>
+    <span class="chip"><span class="icon">💰</span> Finance &amp; P&amp;L</span>
+    <span class="chip"><span class="icon">📊</span> Reports</span>
+    <span class="chip"><span class="icon">🎁</span> Promos</span>
+    <span class="chip"><span class="icon">🏪</span> Multi-Store</span>
+  </div>
+
+  <!-- Disclaimer -->
+  <p class="disclaimer">
+    Demo data is reset automatically each session. Changes you make are stored locally<br>
+    and won't affect any real system. All figures are fictional.
+  </p>
+
+</div>
+
+<script src="demo-auto-reset.js"></script>
+<script>
+  const btnLaunch = document.getElementById('btnLaunch');
+
+  btnLaunch.addEventListener('click', () => {
+    // Show loading state
+    btnLaunch.classList.add('loading');
+
+    // Run the reset (already loaded via script tag) then redirect
+    // Give a brief moment so the spinner is visible
+    setTimeout(() => {
+      window.location.href = 'order.html';
+    }, 800);
+  });
+</script>
+
+</body>
+</html>
