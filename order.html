@@ -1,2062 +1,3622 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Order · KPoin POS</title>
-<link rel="stylesheet" href="styles.css" />
-<style>
-  /* ============================================================
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order · KPoin POS</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ============================================================
      POS layout — three columns
      [sidebar 232]  [main flex]  [cart 408]
   ============================================================ */
-  body {
-    height: 100vh;
-    overflow: hidden;
-  }
-  .app {
-    display: grid;
-    grid-template-columns: 232px 1fr 408px;
-    height: 100vh;
-  }
+    body {
+      height: 100vh;
+      overflow: hidden;
+    }
 
-  /* ---------- Sidebar ---------- */
-  .sidebar {
-    background: #fff;
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 20px 14px;
-  }
-  .side-logo {
-    display: flex; align-items: center; gap: 10px;
-    padding: 4px 10px 22px;
-    font-weight: 700; font-size: 16px; letter-spacing: -0.01em;
-  }
-  .side-logo .logo-mark {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: var(--brand-500); color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 15px;
-  }
-  .nav-section-label {
-    padding: 12px 12px 6px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
-    color: var(--gray-400); text-transform: uppercase;
-    margin-top: 10px;
-  }
-  .nav-section-label:first-of-type {
-    margin-top: 0;
-  }
-  .nav { display: flex; flex-direction: column; gap: 2px; }
-  .nav-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    color: var(--gray-700);
-    font-size: 14px; font-weight: 500;
-    cursor: pointer;
-    transition: background 120ms, color 120ms;
-    position: relative;
-  }
-  .nav-item:hover { background: var(--gray-50); color: var(--gray-900); }
-  .nav-item .nav-icon { width: 20px; height: 20px; flex-shrink: 0; }
-  .nav-item .nav-badge {
-    margin-left: auto;
-    font-size: 11px; font-weight: 600;
-    padding: 2px 7px; border-radius: 999px;
-    background: var(--gray-100); color: var(--gray-600);
-  }
-  .nav-item.active {
-    background: var(--brand-50);
-    color: var(--brand-700);
-    font-weight: 600;
-  }
-  .nav-item.active .nav-icon { color: var(--brand-500); }
-  .nav-item.active:hover { background: var(--brand-50); }
+    .app {
+      display: grid;
+      grid-template-columns: 232px 1fr 408px;
+      height: 100vh;
+    }
 
-  .side-spacer { flex: 1; }
+    /* ---------- Sidebar ---------- */
+    .sidebar {
+      background: #fff;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 14px;
+    }
 
-  .side-user {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--gray-50);
-    cursor: pointer;
-  }
-  .side-user:hover { background: #fff; }
-  .avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
-    color: #fff; font-weight: 600; font-size: 13px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .side-user .who { line-height: 1.2; min-width: 0; }
-  .side-user .who .name { font-size: 13px; font-weight: 600; color: var(--gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .side-user .who .role { font-size: 11px; color: var(--gray-500); }
+    .side-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 10px 22px;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
 
-  /* ---------- Main panel ---------- */
-  .main {
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .main-head {
-    padding: 18px 24px;
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 16px;
-  }
-  .main-head .title { display: flex; flex-direction: column; gap: 2px; }
-  .main-head .title h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: var(--gray-900); }
-  .main-head .title .sub { font-size: 12px; color: var(--gray-500); }
+    .side-logo .logo-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--brand-500);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+    }
 
-  .search {
-    flex: 1; max-width: 480px;
-    margin-left: auto;
-    position: relative;
-  }
-  .search input {
-    width: 100%; height: 42px;
-    border-radius: 10px;
-    border: 1px solid var(--border-strong);
-    background: #fff;
-    padding: 0 14px 0 42px;
-    font-size: 14px;
-    outline: none;
-    transition: border 120ms, box-shadow 120ms;
-  }
-  .search input:focus { border-color: var(--brand-500); box-shadow: 0 0 0 4px rgba(61,85,204,0.12); }
-  .search .icon {
-    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-    color: var(--gray-400);
-  }
-  .search .kbd {
-    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-    font-size: 11px; font-weight: 500; color: var(--gray-500);
-    background: var(--gray-100); border: 1px solid var(--border);
-    padding: 2px 6px; border-radius: 6px;
-  }
+    .nav-section-label {
+      padding: 12px 12px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
 
-  .icon-btn {
-    width: 42px; height: 42px;
-    border-radius: 10px;
-    background: #fff;
-    border: 1px solid var(--border-strong);
-    display: inline-flex; align-items: center; justify-content: center;
-    color: var(--gray-700);
-    transition: background 120ms, color 120ms;
-  }
-  .icon-btn:hover { background: var(--gray-50); color: var(--brand-500); }
-  .icon-btn .dot {
-    position: absolute;
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--danger-500);
-    border: 2px solid #fff;
-    top: 6px; right: 6px;
-  }
-  .icon-btn.with-dot { position: relative; }
+    .nav-section-label:first-of-type {
+      margin-top: 0;
+    }
 
-  /* category bar */
-  .cats {
-    padding: 14px 24px 6px;
-    display: flex; align-items: center; gap: 8px;
-    overflow-x: auto;
-  }
-  .cats::-webkit-scrollbar { display: none; }
-  .cat {
-    display: inline-flex; align-items: center; gap: 8px;
-    height: 38px; padding: 0 14px;
-    border-radius: 999px;
-    background: #fff;
-    border: 1px solid var(--border);
-    font-size: 13px; font-weight: 500;
-    color: var(--gray-700);
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 120ms;
-  }
-  .cat .count {
-    background: var(--gray-100);
-    color: var(--gray-600);
-    font-size: 11px; font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 999px;
-  }
-  .cat:hover { border-color: var(--brand-300); color: var(--brand-700); }
-  .cat.active {
-    background: var(--brand-500); color: #fff; border-color: var(--brand-500);
-  }
-  .cat.active .count { background: rgba(255,255,255,0.22); color: #fff; }
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
 
-  /* sub-toolbar */
-  .toolbar {
-    padding: 6px 24px 14px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .toolbar .muted { font-size: 12px; color: var(--gray-500); }
-  .sort-select {
-    height: 32px; padding: 0 28px 0 10px;
-    border-radius: 8px;
-    background: #fff;
-    border: 1px solid var(--border-strong);
-    font-size: 12px; color: var(--gray-700);
-    appearance: none; -webkit-appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-    background-repeat: no-repeat; background-position: right 8px center;
-    cursor: pointer;
-  }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: var(--gray-700);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 120ms, color 120ms;
+      position: relative;
+    }
 
-  /* product grid */
-  .grid {
-    flex: 1;
-    padding: 4px 24px 24px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 14px;
-    overflow-y: auto;
-    align-content: start;
-  }
+    .nav-item:hover {
+      background: var(--gray-50);
+      color: var(--gray-900);
+    }
 
-  .product {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px;
-    cursor: pointer;
-    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
-    display: flex; flex-direction: column;
-    position: relative;
-  }
-  .product:hover {
-    border-color: var(--brand-300);
-    box-shadow: 0 8px 18px -6px rgba(61,85,204,0.15);
-    transform: translateY(-1px);
-  }
-  .product:active { transform: translateY(0); }
+    .nav-item .nav-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
 
-  .product-img {
-    aspect-ratio: 4 / 3;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-    position: relative;
-  }
-  .product-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .product-img .emoji { font-size: 44px; filter: grayscale(0) saturate(1.1); }
-  .product-img svg.default-icon {
-    width: 44px;
-    height: 44px;
-    opacity: 0.65;
-  }
-  .product .variant-tag {
-    position: absolute; top: 10px; right: 10px;
-    background: rgba(255,255,255,0.94);
-    backdrop-filter: blur(6px);
-    color: var(--brand-700);
-    font-size: 10px; font-weight: 600;
-    letter-spacing: 0.05em;
-    padding: 3px 7px;
-    border-radius: 999px;
-    text-transform: uppercase;
-    box-shadow: var(--shadow-sm);
-  }
-  .product .stock-tag {
-    position: absolute; top: 10px; left: 10px;
-    font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
-    padding: 3px 7px; border-radius: 999px;
-    text-transform: uppercase;
-  }
-  .stock-tag.low  { background: rgba(245, 158, 11, 0.15); color: #92400E; }
-  .stock-tag.out  { background: rgba(239, 68, 68, 0.15); color: var(--danger-700); }
-  .stock-tag.disc { background: var(--brand-500); color: #fff; }
+    .nav-item .nav-badge {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
 
-  .product .stock-line {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 11px; color: var(--gray-500); font-weight: 500;
-    margin-bottom: 8px;
-  }
-  .product .stock-line .dot {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--success-500);
-  }
-  .product .stock-line.low .dot  { background: var(--warning-500); }
-  .product .stock-line.low  { color: #92400E; }
+    .nav-item.active {
+      background: var(--brand-50);
+      color: var(--brand-700);
+      font-weight: 600;
+    }
 
-  .product .name {
-    font-size: 14px; font-weight: 600; color: var(--gray-900);
-    line-height: 1.25;
-    margin-bottom: 4px;
-    text-wrap: pretty;
-  }
-  .product .meta {
-    font-size: 11px; color: var(--gray-500);
-    margin-bottom: 8px;
-  }
-  .product .foot {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: auto;
-    gap: 8px;
-  }
-  .product .price {
-    font-size: 13.5px; font-weight: 700; color: var(--gray-900);
-    font-variant-numeric: tabular-nums;
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 2px 6px;
-    min-width: 0;
-    flex: 1;
-  }
-  .product .price .from { font-size: 10px; color: var(--gray-500); font-weight: 500; margin-right: 2px; white-space: nowrap; flex-shrink: 0; }
-  .product .price .now { white-space: nowrap; flex-shrink: 0; }
-  .product .price .was {
-    font-size: 10.5px; font-weight: 500; color: var(--gray-400);
-    text-decoration: line-through;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .product .price.has-disc .now { color: var(--danger-500); }
-  .product .add {
-    width: 30px; height: 30px;
-    border-radius: 8px;
-    background: var(--brand-50);
-    color: var(--brand-600);
-    display: inline-flex; align-items: center; justify-content: center;
-    transition: background 120ms, color 120ms;
-    flex-shrink: 0;
-  }
-  .product:hover .add { background: var(--brand-500); color: #fff; }
-  .product.out-of-stock { opacity: 0.55; pointer-events: none; }
-  .product.out-of-stock:hover { transform: none; box-shadow: none; border-color: var(--border); }
+    .nav-item.active .nav-icon {
+      color: var(--brand-500);
+    }
 
-  /* ---------- Cart panel ---------- */
-  .cart {
-    background: #fff;
-    border-left: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    height: 100vh;
-  }
-  .cart-head {
-    padding: 18px 22px 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  .cart-head .row {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .cart-head h2 { margin: 0; font-size: 16px; font-weight: 700; color: var(--gray-900); display: flex; align-items: center; gap: 8px; }
-  .cart-head .order-id { font-size: 12px; color: var(--gray-500); font-variant-numeric: tabular-nums; }
-  .cart-head .clear-btn {
-    color: var(--danger-500); font-size: 12px; font-weight: 500;
-    padding: 4px 8px; border-radius: 6px;
-  }
-  .cart-head .clear-btn:hover { background: var(--danger-50); }
+    .nav-item.active:hover {
+      background: var(--brand-50);
+    }
 
-  .customer-bar {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 10px;
-    background: var(--gray-50);
-    border: 1px dashed var(--border-strong);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 120ms, border-color 120ms;
-  }
-  .customer-bar:hover { background: var(--brand-50); border-color: var(--brand-300); }
-  .customer-bar .who { flex: 1; line-height: 1.2; }
-  .customer-bar .who .name { font-size: 13px; font-weight: 600; color: var(--gray-900); }
-  .customer-bar .who .meta { font-size: 11px; color: var(--gray-500); }
+    .side-spacer {
+      flex: 1;
+    }
 
-  .order-type {
-    margin-top: 10px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
-    padding: 4px;
-    background: var(--gray-100);
-    border-radius: 10px;
-  }
-  .order-type button {
-    height: 32px;
-    border-radius: 7px;
-    font-size: 12px; font-weight: 600;
-    color: var(--gray-600);
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    transition: background 120ms, color 120ms;
-  }
-  .order-type button.active {
-    background: #fff;
-    color: var(--gray-900);
-    box-shadow: var(--shadow-sm);
-  }
+    .side-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--gray-50);
+      cursor: pointer;
+    }
 
-  /* cart items */
-  .cart-items {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px 14px;
-  }
-  .cart-empty {
-    flex: 1;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    color: var(--gray-400);
-    text-align: center; padding: 32px;
-  }
-  .cart-empty .emoji {
-    width: 72px; height: 72px; border-radius: 50%;
-    background: var(--gray-50);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--gray-300);
-    margin-bottom: 14px;
-  }
-  .cart-empty h3 { font-size: 15px; font-weight: 600; color: var(--gray-700); margin: 0 0 6px; }
-  .cart-empty p { margin: 0; font-size: 13px; color: var(--gray-500); }
+    .side-user:hover {
+      background: #fff;
+    }
 
-  .cart-row {
-    padding: 12px 8px;
-    border-bottom: 1px dashed var(--border);
-    display: grid;
-    grid-template-columns: 40px 1fr;
-    gap: 12px;
-    align-items: start;
-  }
-  .cart-row:last-child { border-bottom: none; }
-  .cart-row .thumb {
-    width: 40px; height: 40px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    overflow: hidden;
-  }
-  .cart-row .thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .cart-row .thumb svg.default-icon {
-    width: 20px;
-    height: 20px;
-    opacity: 0.65;
-  }
-  .cart-row .body { min-width: 0; }
-  .cart-row .top {
-    display: flex; align-items: start; justify-content: space-between; gap: 8px;
-  }
-  .cart-row .name { font-size: 14px; font-weight: 600; color: var(--gray-900); line-height: 1.25; }
-  .cart-row .var-line { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
-  .cart-row .remove {
-    color: var(--gray-400);
-    width: 24px; height: 24px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border-radius: 6px;
-    flex-shrink: 0;
-  }
-  .cart-row .remove:hover { color: var(--danger-500); background: var(--danger-50); }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+      color: #fff;
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
 
-  .cart-row .bottom {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-top: 8px;
-  }
-  .qty {
-    display: inline-flex; align-items: center; gap: 0;
-    background: var(--gray-100);
-    border-radius: 8px;
-    padding: 2px;
-  }
-  .qty button {
-    width: 26px; height: 26px;
-    border-radius: 6px;
-    color: var(--gray-700);
-    display: inline-flex; align-items: center; justify-content: center;
-    transition: background 120ms, color 120ms;
-  }
-  .qty button:hover { background: #fff; color: var(--brand-500); }
-  .qty .n {
-    width: 28px; text-align: center;
-    font-size: 13px; font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    color: var(--gray-900);
-  }
-  .cart-row .line-price {
-    font-size: 14px; font-weight: 700; color: var(--gray-900);
-    font-variant-numeric: tabular-nums;
-    display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
-  }
-  .cart-row .line-price .was {
-    font-size: 11px; font-weight: 500; color: var(--gray-400);
-    text-decoration: line-through;
-  }
+    .side-user .who {
+      line-height: 1.2;
+      min-width: 0;
+    }
 
-  /* cart foot */
-  .cart-foot { border-top: 1px solid var(--border); padding: 14px 22px 18px; background: #fff; }
-  .promo {
-    display: flex; gap: 6px; margin-bottom: 12px;
-  }
-  .promo input {
-    flex: 1; height: 38px;
-    border-radius: 9px;
-    border: 1px solid var(--border-strong);
-    background: var(--gray-50);
-    padding: 0 12px;
-    font-size: 13px;
-    outline: none;
-  }
-  .promo input:focus { border-color: var(--brand-500); background: #fff; }
-  .promo button {
-    height: 38px; padding: 0 14px;
-    border-radius: 9px;
-    border: 1px solid var(--border-strong);
-    background: #fff;
-    font-size: 13px; font-weight: 600; color: var(--gray-700);
-  }
-  .promo button:hover { border-color: var(--brand-400); color: var(--brand-600); }
+    .side-user .who .name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-900);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  .applied-promo {
-    display: none;
-    align-items: center; justify-content: space-between;
-    background: var(--brand-50);
-    border: 1px solid var(--brand-100);
-    border-radius: 9px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    color: var(--brand-700);
-    font-size: 12px; font-weight: 500;
-  }
-  .applied-promo.show { display: flex; }
-  .applied-promo .remove-promo { color: var(--brand-700); width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;}
-  .applied-promo .remove-promo:hover { background: var(--brand-100); }
+    .side-user .who .role {
+      font-size: 11px;
+      color: var(--gray-500);
+    }
 
-  .totals {
-    display: flex; flex-direction: column; gap: 6px;
-    margin-bottom: 14px;
-    font-size: 13px;
-  }
-  .totals .row { display: flex; justify-content: space-between; color: var(--gray-600); }
-  .totals .row.discount { color: var(--success-700); }
-  .totals .row .num { font-variant-numeric: tabular-nums; }
-  .totals .grand {
-    display: flex; justify-content: space-between; align-items: baseline;
-    margin-top: 8px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--border-strong);
-  }
-  .totals .grand .label { font-size: 14px; font-weight: 600; color: var(--gray-700); }
-  .totals .grand .val {
-    font-size: 24px; font-weight: 700; color: var(--gray-900);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.01em;
-  }
+    /* ---------- Main panel ---------- */
+    .main {
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-  .pay-select {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
-    margin-bottom: 12px;
-  }
-  .pay-btn {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 4px;
-    padding: 10px 6px;
-    border-radius: 10px;
-    background: var(--gray-50);
-    border: 1px solid var(--border);
-    color: var(--gray-600);
-    font-size: 12px; font-weight: 500;
-    transition: all 120ms;
-  }
-  .pay-btn:hover { border-color: var(--brand-300); color: var(--gray-900); }
-  .pay-btn.active {
-    background: var(--brand-50);
-    border-color: var(--brand-500);
-    color: var(--brand-700);
-  }
-  .pay-btn.active svg { stroke: var(--brand-600); }
+    .main-head {
+      padding: 18px 24px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
 
-  .checkout-row { display: grid; grid-template-columns: 88px 1fr; gap: 8px; }
-  .checkout-row .hold {
-    border-radius: 12px;
-    background: #fff;
-    border: 1px solid var(--border-strong);
-    font-size: 14px; font-weight: 600;
-    color: var(--gray-700);
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .checkout-row .hold:hover { background: var(--gray-50); border-color: var(--gray-400); }
-  .checkout-row .checkout {
-    height: 56px;
-    border-radius: 12px;
-    background: var(--brand-500);
-    color: #fff;
-    font-size: 16px; font-weight: 700;
-    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: 0 8px 16px -6px rgba(61,85,204,0.45);
-    transition: background 120ms;
-  }
-  .checkout-row .checkout:hover { background: var(--brand-600); }
-  .checkout-row .checkout:disabled {
-    background: var(--gray-200); color: var(--gray-400);
-    box-shadow: none; cursor: not-allowed;
-  }
+    .main-head .title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
 
-  /* ---------- Variant modal ---------- */
-  .scrim {
-    position: fixed; inset: 0;
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(4px);
-    z-index: 50;
-    display: none;
-    align-items: center; justify-content: center;
-  }
-  .scrim.show { display: flex; animation: fadein 160ms ease; }
-  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes slideup { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .main-head .title h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--gray-900);
+    }
 
-  .modal {
-    width: 480px; max-width: calc(100vw - 32px);
-    background: #fff;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    animation: slideup 200ms ease;
-  }
-  .modal-head {
-    display: flex; gap: 14px; align-items: center;
-    padding: 18px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .modal-head .thumb {
-    width: 56px; height: 56px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 30px; flex-shrink: 0;
-    overflow: hidden;
-  }
-  .modal-head .thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .modal-head .thumb svg.default-icon {
-    width: 28px;
-    height: 28px;
-    opacity: 0.65;
-  }
-  .modal-head h3 { margin: 0 0 2px; font-size: 16px; font-weight: 700; color: var(--gray-900); }
-  .modal-head .sub { font-size: 12px; color: var(--gray-500); }
-  .modal-head .close-x {
-    margin-left: auto;
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    color: var(--gray-500);
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .modal-head .close-x:hover { background: var(--gray-100); color: var(--gray-800); }
+    .main-head .title .sub {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
 
-  .modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 18px; max-height: 56vh; overflow-y: auto; }
-  .variant-group .vg-head {
-    display: flex; align-items: baseline; justify-content: space-between;
-    margin-bottom: 8px;
-  }
-  .variant-group .vg-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
-  .variant-group .vg-req { font-size: 11px; color: var(--gray-500); }
-  .vg-options { display: flex; flex-wrap: wrap; gap: 8px; }
-  .vg-option {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 8px 12px;
-    border-radius: 10px;
-    background: #fff;
-    border: 1.5px solid var(--border);
-    font-size: 13px; font-weight: 500;
-    color: var(--gray-700);
-    transition: all 120ms;
-  }
-  .vg-option .delta { font-size: 11px; color: var(--gray-500); font-variant-numeric: tabular-nums; }
-  .vg-option:hover { border-color: var(--brand-300); }
-  .vg-option.active {
-    background: var(--brand-50);
-    border-color: var(--brand-500);
-    color: var(--brand-700);
-  }
-  .vg-option.active .delta { color: var(--brand-600); }
+    .search {
+      flex: 1;
+      max-width: 480px;
+      margin-left: auto;
+      position: relative;
+    }
 
-  .modal-foot {
-    padding: 16px 20px;
-    background: var(--gray-50);
-    border-top: 1px solid var(--border);
-    display: flex; align-items: center; gap: 14px;
-  }
-  .modal-foot .qty-stepper {
-    display: inline-flex; align-items: center;
-    background: #fff; border: 1px solid var(--border-strong);
-    border-radius: 10px;
-    padding: 4px;
-  }
-  .modal-foot .qty-stepper button {
-    width: 32px; height: 32px;
-    border-radius: 6px;
-    color: var(--gray-700);
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .modal-foot .qty-stepper button:hover { background: var(--gray-100); color: var(--brand-500); }
-  .modal-foot .qty-stepper .n {
-    width: 36px; text-align: center;
-    font-size: 14px; font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-  .modal-foot .add-to-cart {
-    flex: 1;
-    height: 44px;
-    border-radius: 10px;
-    background: var(--brand-500); color: #fff;
-    font-size: 14px; font-weight: 600;
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .modal-foot .add-to-cart:hover { background: var(--brand-600); }
-  .modal-foot .add-to-cart .price { font-variant-numeric: tabular-nums; opacity: 0.95; }
+    .search input {
+      width: 100%;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid var(--border-strong);
+      background: #fff;
+      padding: 0 14px 0 42px;
+      font-size: 14px;
+      outline: none;
+      transition: border 120ms, box-shadow 120ms;
+    }
 
-  /* ---------- Customer modal ---------- */
-  .cm-modal {
-    width: 520px; max-width: calc(100vw - 32px);
-    background: #fff;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    animation: slideup 200ms ease;
-    display: flex; flex-direction: column;
-    max-height: 80vh;
-  }
-  .cm-tabs {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 0;
-    padding: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-  .cm-tab {
-    height: 36px;
-    border-radius: 8px;
-    font-size: 13px; font-weight: 600;
-    color: var(--gray-500);
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .cm-tab:hover { color: var(--gray-700); }
-  .cm-tab.active { background: var(--brand-50); color: var(--brand-700); }
+    .search input:focus {
+      border-color: var(--brand-500);
+      box-shadow: 0 0 0 4px rgba(61, 85, 204, 0.12);
+    }
 
-  .cm-search {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
-  .cm-search input {
-    width: 100%; height: 44px;
-    padding: 0 14px 0 42px;
-    background: var(--gray-50);
-    border: 1px solid var(--border-strong);
-    border-radius: 10px;
-    font-size: 14px;
-    outline: none;
-  }
-  .cm-search input:focus { background: #fff; border-color: var(--brand-500); box-shadow: 0 0 0 4px rgba(61,85,204,0.12); }
-  .cm-search .icon {
-    position: absolute; left: 34px; top: 50%; transform: translateY(-50%);
-    color: var(--gray-400); display: flex;
-  }
+    .search .icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+    }
 
-  .cm-list { flex: 1; overflow-y: auto; padding: 6px; }
-  .cm-list:empty + .cm-empty { display: flex; }
-  .cm-row {
-    display: grid;
-    grid-template-columns: 44px 1fr auto;
-    gap: 12px;
-    align-items: center;
-    padding: 10px 14px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 120ms;
-  }
-  .cm-row:hover { background: var(--brand-50); }
-  .cm-row .who { min-width: 0; }
-  .cm-row .who .nm { font-size: 14px; font-weight: 600; color: var(--gray-900); display: flex; align-items: center; gap: 6px; }
-  .cm-row .who .phone { font-size: 12px; color: var(--gray-500); font-variant-numeric: tabular-nums; }
-  .cm-row .pts {
-    display: flex; flex-direction: column; align-items: flex-end;
-  }
-  .cm-row .pts .n {
-    font-size: 14px; font-weight: 700; color: var(--brand-600);
-    font-variant-numeric: tabular-nums;
-  }
-  .cm-row .pts .lbl {
-    font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
-    color: var(--gray-400); text-transform: uppercase;
-  }
+    .search .kbd {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--gray-500);
+      background: var(--gray-100);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
 
-  .cm-empty {
-    display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center;
-    padding: 40px 24px; text-align: center; color: var(--gray-500);
-  }
-  .cm-empty h4 { margin: 12px 0 4px; font-size: 14px; font-weight: 600; color: var(--gray-700); }
-  .cm-empty p { margin: 0 0 12px; font-size: 13px; }
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #fff;
+      border: 1px solid var(--border-strong);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-700);
+      transition: background 120ms, color 120ms;
+    }
 
-  /* register pane */
-  .cm-register { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
-  .cm-register .helper {
-    padding: 10px 12px;
-    background: var(--brand-50);
-    border: 1px solid var(--brand-100);
-    border-radius: 10px;
-    font-size: 12px;
-    color: var(--brand-700);
-    display: flex; align-items: flex-start; gap: 8px;
-  }
-  .cm-register .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+    .icon-btn:hover {
+      background: var(--gray-50);
+      color: var(--brand-500);
+    }
 
-  /* ---------- Checkout overlay ---------- */
-  .checkout-modal {
-    width: 540px; max-width: calc(100vw - 32px);
-    background: #fff;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    animation: slideup 200ms ease;
-    display: flex; flex-direction: column;
-    max-height: 92vh;
-  }
-  .ck-head {
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 12px;
-  }
-  .ck-head h3 { margin: 0; font-size: 16px; font-weight: 700; }
-  .ck-head .ck-sub { font-size: 12px; color: var(--gray-500); }
-  .ck-head .pay-pill {
-    margin-left: auto;
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 10px;
-    background: var(--brand-50); color: var(--brand-700);
-    border-radius: 999px;
-    font-size: 12px; font-weight: 600;
-  }
-  .ck-head .close-x {
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    color: var(--gray-500);
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .ck-head .close-x:hover { background: var(--gray-100); color: var(--gray-800); }
+    .icon-btn .dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--danger-500);
+      border: 2px solid #fff;
+      top: 6px;
+      right: 6px;
+    }
 
-  .ck-body { padding: 24px 22px; overflow-y: auto; flex: 1; }
+    .icon-btn.with-dot {
+      position: relative;
+    }
 
-  .ck-total-display {
-    text-align: center;
-    padding: 18px 0 22px;
-  }
-  .ck-total-display .label {
-    font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
-    color: var(--gray-500); text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .ck-total-display .amount {
-    font-size: 44px; font-weight: 700; letter-spacing: -0.02em;
-    color: var(--gray-900); font-variant-numeric: tabular-nums;
-    line-height: 1.1;
-  }
+    /* category bar */
+    .cats {
+      padding: 14px 24px 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+    }
 
-  /* Cash pane */
-  .cash-input {
-    position: relative;
-    margin-bottom: 14px;
-  }
-  .cash-input .currency {
-    display: none;
-  }
-  .cash-input input {
-    width: 100%; height: 64px;
-    border-radius: 12px;
-    border: 1.5px solid var(--border-strong);
-    background: var(--gray-50);
-    padding: 0 18px;
-    font-size: 26px; font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--gray-900);
-    outline: none;
-    transition: border-color 120ms, background 120ms;
-  }
-  .cash-input input:focus {
-    border-color: var(--brand-500); background: #fff;
-    box-shadow: 0 0 0 4px rgba(61,85,204,0.12);
-  }
-  .cash-chips {
-    display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
-    margin-bottom: 16px;
-  }
-  .cash-chip {
-    height: 38px;
-    border-radius: 9px;
-    background: var(--gray-50);
-    border: 1px solid var(--border);
-    font-size: 13px; font-weight: 600;
-    color: var(--gray-700);
-    transition: all 120ms;
-  }
-  .cash-chip:hover { border-color: var(--brand-300); color: var(--brand-700); }
-  .cash-chip.exact { background: var(--brand-50); color: var(--brand-700); border-color: var(--brand-100); }
-  .change-card {
-    padding: 14px 18px;
-    background: var(--gray-50);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .change-card .lbl { font-size: 13px; color: var(--gray-600); font-weight: 500; }
-  .change-card .val {
-    font-size: 26px; font-weight: 700; color: var(--success-700);
-    font-variant-numeric: tabular-nums;
-  }
-  .change-card.short .val { color: var(--danger-500); }
-  .change-card.short .lbl { color: var(--danger-700); }
+    .cats::-webkit-scrollbar {
+      display: none;
+    }
 
-  /* Card pane */
-  .card-pane {
-    display: flex; flex-direction: column; align-items: center; padding: 20px 0;
-  }
-  .edc {
-    width: 200px; height: 130px;
-    border-radius: 16px;
-    background: linear-gradient(180deg, var(--gray-900) 0%, var(--gray-700) 100%);
-    position: relative;
-    margin: 16px 0 22px;
-    box-shadow: 0 16px 30px -10px rgba(0,0,0,0.25);
-  }
-  .edc::before {
-    content: '';
-    position: absolute;
-    width: 130px; height: 24px;
-    background: var(--gray-300);
-    top: 16px; left: 50%; transform: translateX(-50%);
-    border-radius: 4px;
-  }
-  .edc .screen {
-    position: absolute; top: 48px; left: 50%; transform: translateX(-50%);
-    width: 130px; height: 38px;
-    background: rgba(61, 85, 204, 0.18);
-    border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-  }
-  .edc .screen .blink {
-    color: rgba(255,255,255,0.95);
-    font-size: 10px; font-weight: 600;
-    letter-spacing: 0.15em;
-  }
-  .edc .slot {
-    position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
-    width: 70px; height: 4px;
-    background: var(--gray-800); border-radius: 2px;
-  }
-  .card-pulse {
-    position: absolute; inset: -20px;
-    border: 3px solid var(--brand-500);
-    border-radius: 24px;
-    opacity: 0;
-    animation: pulse 1.6s ease-out infinite;
-  }
-  @keyframes pulse {
-    0%   { transform: scale(0.96); opacity: 0.6; }
-    100% { transform: scale(1.08); opacity: 0; }
-  }
-  .card-status {
-    text-align: center;
-  }
-  .card-status .title {
-    font-size: 18px; font-weight: 600; color: var(--gray-900); margin-bottom: 6px;
-  }
-  .card-status .sub { font-size: 13px; color: var(--gray-500); }
-  .card-status .dots {
-    display: inline-flex; gap: 4px; margin-top: 12px;
-  }
-  .card-status .dots span {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--brand-500);
-    animation: bob 1.4s ease-in-out infinite;
-  }
-  .card-status .dots span:nth-child(2) { animation-delay: 0.2s; }
-  .card-status .dots span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bob {
-    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-    40% { transform: translateY(-6px); opacity: 1; }
-  }
+    .cat {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 120ms;
+    }
 
-  /* QR pane */
-  .qr-pane { display: flex; flex-direction: column; align-items: center; padding: 6px 0 0; }
-  .qr-wrap {
-    padding: 14px;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    margin-bottom: 14px;
-    position: relative;
-  }
-  .qr-corner {
-    position: absolute;
-    width: 16px; height: 16px;
-    border: 3px solid var(--brand-500);
-  }
-  .qr-corner.tl { top: -3px; left: -3px;     border-right: 0; border-bottom: 0; border-top-left-radius: 8px; }
-  .qr-corner.tr { top: -3px; right: -3px;    border-left: 0;  border-bottom: 0; border-top-right-radius: 8px; }
-  .qr-corner.bl { bottom: -3px; left: -3px;  border-right: 0; border-top: 0;    border-bottom-left-radius: 8px; }
-  .qr-corner.br { bottom: -3px; right: -3px; border-left: 0;  border-top: 0;    border-bottom-right-radius: 8px; }
-  .qr-pane .help {
-    text-align: center; font-size: 13px; color: var(--gray-600);
-    max-width: 320px; line-height: 1.5;
-  }
-  .qr-bank-row {
-    display: flex; gap: 8px; margin: 12px 0 16px;
-    justify-content: center; flex-wrap: wrap;
-  }
-  .qr-bank {
-    height: 28px; padding: 0 10px;
-    border-radius: 999px;
-    background: var(--gray-50);
-    border: 1px solid var(--border);
-    font-size: 11px; font-weight: 600;
-    color: var(--gray-600);
-    display: inline-flex; align-items: center;
-  }
+    .cat .count {
+      background: var(--gray-100);
+      color: var(--gray-600);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
 
-  /* Checkout foot actions */
-  .ck-foot {
-    padding: 14px 22px;
-    background: var(--gray-50);
-    border-top: 1px solid var(--border);
-    display: flex; gap: 10px;
-  }
-  .ck-foot .btn { flex: 1; }
-  .ck-foot .btn-primary { flex: 1.4; }
+    .cat:hover {
+      border-color: var(--brand-300);
+      color: var(--brand-700);
+    }
 
-  /* ---------- Receipt ---------- */
-  .receipt-modal {
-    width: 720px; max-width: calc(100vw - 32px);
-    max-height: 92vh;
-    background: var(--gray-50);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    animation: slideup 200ms ease;
-    display: grid;
-    grid-template-columns: 1fr 320px;
-  }
+    .cat.active {
+      background: var(--brand-500);
+      color: #fff;
+      border-color: var(--brand-500);
+    }
 
-  .receipt {
-    background: #fff;
-    margin: 24px;
-    padding: 26px 24px 32px;
-    border-radius: 6px;
-    box-shadow: 0 12px 24px -10px rgba(0,0,0,0.12);
-    font-family: 'Inter', monospace;
-    font-size: 12px;
-    line-height: 1.55;
-    color: var(--gray-800);
-    max-height: calc(92vh - 48px);
-    overflow-y: auto;
-    /* receipt edge effect */
-    position: relative;
-  }
-  .receipt::before, .receipt::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0;
-    height: 12px;
-    background: radial-gradient(circle at 8px 0, transparent 5px, #fff 5.5px);
-    background-size: 16px 12px;
-    background-repeat: repeat-x;
-  }
-  .receipt::before { top: -6px; }
-  .receipt::after { bottom: -6px; transform: scaleY(-1); }
+    .cat.active .count {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
 
-  .receipt h4 {
-    margin: 0;
-    text-align: center;
-    font-size: 18px; font-weight: 700; letter-spacing: 0.02em;
-  }
-  .receipt .rc-meta { text-align: center; color: var(--gray-500); font-size: 11px; margin-top: 4px; }
-  .receipt .rc-info {
-    display: grid; grid-template-columns: auto 1fr;
-    gap: 4px 12px;
-    margin: 16px 0;
-    font-size: 12px;
-  }
-  .receipt .rc-info .k { color: var(--gray-500); }
-  .receipt .rc-info .v { color: var(--gray-900); font-weight: 500; text-align: right; }
-  .receipt .sep {
-    border: none; border-top: 1px dashed var(--gray-300);
-    margin: 12px 0;
-  }
-  .receipt .rc-line {
-    display: grid; grid-template-columns: 1fr auto;
-    gap: 4px;
-    margin-bottom: 6px;
-  }
-  .receipt .rc-line .nm { font-weight: 600; color: var(--gray-900); font-size: 12px; }
-  .receipt .rc-line .qty {
-    grid-column: 1 / -1;
-    color: var(--gray-500); font-size: 11px;
-    margin-top: -2px;
-  }
-  .receipt .rc-line .ln-total { font-variant-numeric: tabular-nums; font-weight: 600; }
-  .receipt .rc-line .ln-disc {
-    grid-column: 1 / -1;
-    color: var(--success-700); font-size: 11px;
-    display: flex; justify-content: space-between;
-  }
-  .receipt .rc-totals { display: flex; flex-direction: column; gap: 4px; }
-  .receipt .rc-totals .row { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
-  .receipt .rc-totals .row.disc { color: var(--success-700); }
-  .receipt .rc-totals .row.grand {
-    font-size: 15px; font-weight: 700; color: var(--gray-900);
-    margin-top: 6px;
-  }
-  .receipt .thanks {
-    text-align: center;
-    margin-top: 16px;
-    color: var(--gray-500); font-size: 11px;
-  }
-  .receipt .thanks .big {
-    color: var(--brand-600); font-weight: 700; font-size: 13px;
-    margin-bottom: 2px;
-  }
-  .receipt .loyalty {
-    margin-top: 12px;
-    padding: 10px;
-    background: var(--brand-50);
-    border: 1px dashed var(--brand-200);
-    border-radius: 8px;
-    text-align: center; font-size: 12px;
-  }
-  .receipt .loyalty .pts {
-    font-weight: 700; color: var(--brand-700); font-size: 14px;
-  }
-  .barcode {
-    margin-top: 18px;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-  }
-  .barcode svg { width: 180px; height: 40px; }
-  .barcode-num { font-size: 11px; letter-spacing: 0.3em; color: var(--gray-500); }
+    /* sub-toolbar */
+    .toolbar {
+      padding: 6px 24px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-  .rc-side {
-    padding: 26px 22px;
-    display: flex; flex-direction: column;
-    border-left: 1px solid var(--border);
-    background: #fff;
-  }
-  .rc-side h4 { margin: 0 0 4px; font-size: 15px; font-weight: 700; }
-  .rc-side .sub { font-size: 12px; color: var(--gray-500); margin-bottom: 18px; }
-  .rc-success {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px;
-    background: var(--success-50);
-    border: 1px solid #A7F3D0;
-    border-radius: 10px;
-    color: var(--success-700);
-    font-size: 13px; font-weight: 500;
-    margin-bottom: 16px;
-  }
-  .rc-actions { display: flex; flex-direction: column; gap: 8px; }
-  .rc-action {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: #fff;
-    text-align: left;
-    transition: all 120ms;
-  }
-  .rc-action:hover {
-    border-color: var(--brand-300);
-    background: var(--brand-50);
-  }
-  .rc-action:disabled { opacity: 0.45; cursor: not-allowed; }
-  .rc-action:disabled:hover { border-color: var(--border); background: #fff; }
-  .rc-action .ic {
-    width: 36px; height: 36px;
-    border-radius: 9px;
-    background: var(--gray-50);
-    color: var(--brand-600);
-    display: inline-flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .rc-action .body { flex: 1; min-width: 0; }
-  .rc-action .ttl { font-size: 13px; font-weight: 600; color: var(--gray-900); line-height: 1.2; }
-  .rc-action .desc { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
-  .rc-action.sent { background: var(--success-50); border-color: #A7F3D0; }
-  .rc-action.sent .ic { background: var(--success-500); color: #fff; }
+    .toolbar .muted {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
 
-  .rc-side .done-row { margin-top: auto; padding-top: 16px; }
-  .rc-side .done-row .btn { width: 100%; }
+    .sort-select {
+      height: 32px;
+      padding: 0 28px 0 10px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--border-strong);
+      font-size: 12px;
+      color: var(--gray-700);
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      cursor: pointer;
+    }
 
-  /* Success toast */
-  .toast {
-    position: fixed;
-    bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--gray-900); color: #fff;
-    padding: 12px 18px;
-    border-radius: 12px;
-    font-size: 13px; font-weight: 500;
-    box-shadow: var(--shadow-lg);
-    z-index: 100;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 200ms, transform 200ms;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast .toast-icon {
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--success-500);
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  /* Choice Cards */
-  .rc-choices {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .rc-choice-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 16px;
-    border-radius: var(--r-xl);
-    border: 2px solid var(--border);
-    background: #fff;
-    text-align: left;
-    transition: all 200ms ease;
-    cursor: pointer;
-    width: 100%;
-  }
-  .rc-choice-card:hover {
-    border-color: var(--brand-300);
-    background: var(--brand-50);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
-  }
-  .rc-choice-card.active-choice {
-    border-color: var(--brand-500);
-    background: var(--brand-50);
-  }
-  .rc-choice-icons {
-    display: flex;
-    position: relative;
-    height: 38px;
-    width: 38px;
-    flex-shrink: 0;
-  }
-  .rc-choice-icons .ic-badge {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--gray-100);
-    color: var(--gray-600);
-    border: 2px solid #fff;
-  }
-  .rc-choice-icons .ic-badge.printer {
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
-  .rc-choice-icons .ic-badge.wa {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    background: #25D366;
-    color: #fff;
-  }
-  .rc-choice-card:hover .ic-badge.printer {
-    background: var(--brand-500);
-    color: #fff;
-  }
-  .rc-choice-card.active-choice .ic-badge.printer {
-    background: var(--brand-500);
-    color: #fff;
-  }
-  .rc-choice-content {
-    flex: 1;
-    min-width: 0;
-  }
-  .rc-choice-content .ttl {
-    display: block;
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 2px;
-  }
-  .rc-choice-content .desc {
-    display: block;
-    font-size: 11px;
-    color: var(--gray-500);
-    line-height: 1.4;
-  }
-  .rc-choice-content .meta-info {
-    display: inline-block;
-    margin-top: 6px;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: var(--r-full);
-    background: var(--gray-100);
-    color: var(--gray-600);
-  }
-  .rc-choice-card.active-choice .meta-info {
-    background: var(--brand-100);
-    color: var(--brand-800);
-  }
-  .wa-input-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 14px;
-    border-radius: var(--r-lg);
-    background: var(--gray-50);
-    border: 1px solid var(--border);
-    margin-top: -6px;
-    margin-bottom: 6px;
-    animation: slideup 150ms ease;
-  }
-  .wa-input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  .wa-input-wrapper .prefix {
-    position: absolute;
-    left: 10px;
-    font-size: 14px;
-    color: var(--gray-400);
-  }
-  .wa-input-wrapper input {
-    width: 100%;
-    height: 36px;
-    padding: 0 10px 0 24px;
-    border-radius: var(--r-sm);
-    border: 1px solid var(--border-strong);
-    outline: none;
-    font-size: 13px;
-    transition: all 120ms ease;
-  }
-  .wa-input-wrapper input:focus {
-    border-color: #25D366;
-    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.15);
-    background: #fff;
-  }
+    /* product grid */
+    .grid {
+      flex: 1;
+      padding: 4px 24px 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      overflow-y: auto;
+      align-content: start;
+    }
 
-  /* Status Panel styling */
-  .rc-status-panel {
-    background: var(--gray-50);
-    border: 1.5px dashed var(--border-strong);
-    border-radius: var(--r-xl);
-    padding: 20px;
-    text-align: center;
-    margin-bottom: 20px;
-    animation: fadein 200ms ease;
-  }
-  .rc-status-panel .status-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--gray-700);
-    margin: 8px 0;
-  }
-  .spinner-small {
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--gray-200);
-    border-top: 2px solid var(--brand-500);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  .status-success-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
-  .status-success-message .success-icon-check {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--success-500);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    font-weight: 700;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    animation: scaleup-check 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  @keyframes scaleup-check {
-    from { transform: scale(0.5); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  .status-success-message h3 {
-    margin: 8px 0 2px;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--success-700);
-  }
-  .status-success-message p {
-    margin: 0;
-    font-size: 12px;
-    color: var(--gray-500);
-  }
+    .product {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
 
-  /* Store Selector styles */
-  .store-grid-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 4px 2px;
-  }
-  .store-item-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    background: #fff;
-    text-align: left;
-    cursor: pointer;
-    transition: all 150ms ease;
-    width: 100%;
-    box-shadow: var(--shadow-sm);
-  }
-  .store-item-btn:hover {
-    border-color: var(--brand-400);
-    background: var(--brand-50);
-  }
-  .store-item-btn.selected {
-    border-color: var(--brand-600);
-    background: var(--brand-50);
-  }
-  .store-item-btn.selected .check-icon {
-    opacity: 1 !important;
-  }
+    .product:hover {
+      border-color: var(--brand-300);
+      box-shadow: 0 8px 18px -6px rgba(61, 85, 204, 0.15);
+      transform: translateY(-1px);
+    }
 
-</style>
+    .product:active {
+      transform: translateY(0);
+    }
+
+    .product-img {
+      aspect-ratio: 4 / 3;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .product-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-img .emoji {
+      font-size: 44px;
+      filter: grayscale(0) saturate(1.1);
+    }
+
+    .product-img svg.default-icon {
+      width: 44px;
+      height: 44px;
+      opacity: 0.65;
+    }
+
+    .product .variant-tag {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(6px);
+      color: var(--brand-700);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 3px 7px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .product .stock-tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 3px 7px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .stock-tag.low {
+      background: rgba(245, 158, 11, 0.15);
+      color: #92400E;
+    }
+
+    .stock-tag.out {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger-700);
+    }
+
+    .stock-tag.disc {
+      background: var(--brand-500);
+      color: #fff;
+    }
+
+    .product .stock-line {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--gray-500);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .product .stock-line .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success-500);
+    }
+
+    .product .stock-line.low .dot {
+      background: var(--warning-500);
+    }
+
+    .product .stock-line.low {
+      color: #92400E;
+    }
+
+    .product .name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-900);
+      line-height: 1.25;
+      margin-bottom: 4px;
+      text-wrap: pretty;
+    }
+
+    .product .meta {
+      font-size: 11px;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+    }
+
+    .product .foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      gap: 8px;
+    }
+
+    .product .price {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--gray-900);
+      font-variant-numeric: tabular-nums;
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 2px 6px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .product .price .from {
+      font-size: 10px;
+      color: var(--gray-500);
+      font-weight: 500;
+      margin-right: 2px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .product .price .now {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .product .price .was {
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--gray-400);
+      text-decoration: line-through;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .product .price.has-disc .now {
+      color: var(--danger-500);
+    }
+
+    .product .add {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--brand-50);
+      color: var(--brand-600);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 120ms, color 120ms;
+      flex-shrink: 0;
+    }
+
+    .product:hover .add {
+      background: var(--brand-500);
+      color: #fff;
+    }
+
+    .product.out-of-stock {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .product.out-of-stock:hover {
+      transform: none;
+      box-shadow: none;
+      border-color: var(--border);
+    }
+
+    /* ---------- Cart panel ---------- */
+    .cart {
+      background: #fff;
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .cart-head {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cart-head .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .cart-head h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cart-head .order-id {
+      font-size: 12px;
+      color: var(--gray-500);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cart-head .clear-btn {
+      color: var(--danger-500);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .cart-head .clear-btn:hover {
+      background: var(--danger-50);
+    }
+
+    .customer-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: var(--gray-50);
+      border: 1px dashed var(--border-strong);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 120ms, border-color 120ms;
+    }
+
+    .customer-bar:hover {
+      background: var(--brand-50);
+      border-color: var(--brand-300);
+    }
+
+    .customer-bar .who {
+      flex: 1;
+      line-height: 1.2;
+    }
+
+    .customer-bar .who .name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .customer-bar .who .meta {
+      font-size: 11px;
+      color: var(--gray-500);
+    }
+
+    .order-type {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      padding: 4px;
+      background: var(--gray-100);
+      border-radius: 10px;
+    }
+
+    .order-type button {
+      height: 32px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-600);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 120ms, color 120ms;
+    }
+
+    .order-type button.active {
+      background: #fff;
+      color: var(--gray-900);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* cart items */
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 14px;
+    }
+
+    .cart-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-400);
+      text-align: center;
+      padding: 32px;
+    }
+
+    .cart-empty .emoji {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--gray-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-300);
+      margin-bottom: 14px;
+    }
+
+    .cart-empty h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin: 0 0 6px;
+    }
+
+    .cart-empty p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .cart-row {
+      padding: 12px 8px;
+      border-bottom: 1px dashed var(--border);
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .cart-row:last-child {
+      border-bottom: none;
+    }
+
+    .cart-row .thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      overflow: hidden;
+    }
+
+    .cart-row .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cart-row .thumb svg.default-icon {
+      width: 20px;
+      height: 20px;
+      opacity: 0.65;
+    }
+
+    .cart-row .body {
+      min-width: 0;
+    }
+
+    .cart-row .top {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .cart-row .name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-900);
+      line-height: 1.25;
+    }
+
+    .cart-row .var-line {
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-top: 2px;
+    }
+
+    .cart-row .remove {
+      color: var(--gray-400);
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .cart-row .remove:hover {
+      color: var(--danger-500);
+      background: var(--danger-50);
+    }
+
+    .cart-row .bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .qty {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      background: var(--gray-100);
+      border-radius: 8px;
+      padding: 2px;
+    }
+
+    .qty button {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      color: var(--gray-700);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 120ms, color 120ms;
+    }
+
+    .qty button:hover {
+      background: #fff;
+      color: var(--brand-500);
+    }
+
+    .qty .n {
+      width: 28px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--gray-900);
+    }
+
+    .cart-row .line-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gray-900);
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .cart-row .line-price .was {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--gray-400);
+      text-decoration: line-through;
+    }
+
+    /* cart foot */
+    .cart-foot {
+      border-top: 1px solid var(--border);
+      padding: 14px 22px 18px;
+      background: #fff;
+    }
+
+    .promo {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .promo input {
+      flex: 1;
+      height: 38px;
+      border-radius: 9px;
+      border: 1px solid var(--border-strong);
+      background: var(--gray-50);
+      padding: 0 12px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .promo input:focus {
+      border-color: var(--brand-500);
+      background: #fff;
+    }
+
+    .promo button {
+      height: 38px;
+      padding: 0 14px;
+      border-radius: 9px;
+      border: 1px solid var(--border-strong);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .promo button:hover {
+      border-color: var(--brand-400);
+      color: var(--brand-600);
+    }
+
+    .applied-promo {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--brand-50);
+      border: 1px solid var(--brand-100);
+      border-radius: 9px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      color: var(--brand-700);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .applied-promo.show {
+      display: flex;
+    }
+
+    .applied-promo .remove-promo {
+      color: var(--brand-700);
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+
+    .applied-promo .remove-promo:hover {
+      background: var(--brand-100);
+    }
+
+    .totals {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+
+    .totals .row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--gray-600);
+    }
+
+    .totals .row.discount {
+      color: var(--success-700);
+    }
+
+    .totals .row .num {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .totals .grand {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-strong);
+    }
+
+    .totals .grand .label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .totals .grand .val {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-900);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+
+    .pay-select {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .pay-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 10px 6px;
+      border-radius: 10px;
+      background: var(--gray-50);
+      border: 1px solid var(--border);
+      color: var(--gray-600);
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 120ms;
+    }
+
+    .pay-btn:hover {
+      border-color: var(--brand-300);
+      color: var(--gray-900);
+    }
+
+    .pay-btn.active {
+      background: var(--brand-50);
+      border-color: var(--brand-500);
+      color: var(--brand-700);
+    }
+
+    .pay-btn.active svg {
+      stroke: var(--brand-600);
+    }
+
+    .checkout-row {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 8px;
+    }
+
+    .checkout-row .hold {
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid var(--border-strong);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-700);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .checkout-row .hold:hover {
+      background: var(--gray-50);
+      border-color: var(--gray-400);
+    }
+
+    .checkout-row .checkout {
+      height: 56px;
+      border-radius: 12px;
+      background: var(--brand-500);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 16px -6px rgba(61, 85, 204, 0.45);
+      transition: background 120ms;
+    }
+
+    .checkout-row .checkout:hover {
+      background: var(--brand-600);
+    }
+
+    .checkout-row .checkout:disabled {
+      background: var(--gray-200);
+      color: var(--gray-400);
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* ---------- Variant modal ---------- */
+    .scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scrim.show {
+      display: flex;
+      animation: fadein 160ms ease;
+    }
+
+    @keyframes fadein {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideup {
+      from {
+        transform: translateY(8px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal {
+      width: 480px;
+      max-width: calc(100vw - 32px);
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      animation: slideup 200ms ease;
+    }
+
+    .modal-head {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-head .thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .modal-head .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .modal-head .thumb svg.default-icon {
+      width: 28px;
+      height: 28px;
+      opacity: 0.65;
+    }
+
+    .modal-head h3 {
+      margin: 0 0 2px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .modal-head .sub {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    .modal-head .close-x {
+      margin-left: auto;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      color: var(--gray-500);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-head .close-x:hover {
+      background: var(--gray-100);
+      color: var(--gray-800);
+    }
+
+    .modal-body {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-height: 56vh;
+      overflow-y: auto;
+    }
+
+    .variant-group .vg-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .variant-group .vg-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .variant-group .vg-req {
+      font-size: 11px;
+      color: var(--gray-500);
+    }
+
+    .vg-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .vg-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+      transition: all 120ms;
+    }
+
+    .vg-option .delta {
+      font-size: 11px;
+      color: var(--gray-500);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .vg-option:hover {
+      border-color: var(--brand-300);
+    }
+
+    .vg-option.active {
+      background: var(--brand-50);
+      border-color: var(--brand-500);
+      color: var(--brand-700);
+    }
+
+    .vg-option.active .delta {
+      color: var(--brand-600);
+    }
+
+    .modal-foot {
+      padding: 16px 20px;
+      background: var(--gray-50);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .modal-foot .qty-stepper {
+      display: inline-flex;
+      align-items: center;
+      background: #fff;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 4px;
+    }
+
+    .modal-foot .qty-stepper button {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      color: var(--gray-700);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-foot .qty-stepper button:hover {
+      background: var(--gray-100);
+      color: var(--brand-500);
+    }
+
+    .modal-foot .qty-stepper .n {
+      width: 36px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .modal-foot .add-to-cart {
+      flex: 1;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--brand-500);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .modal-foot .add-to-cart:hover {
+      background: var(--brand-600);
+    }
+
+    .modal-foot .add-to-cart .price {
+      font-variant-numeric: tabular-nums;
+      opacity: 0.95;
+    }
+
+    /* ---------- Customer modal ---------- */
+    .cm-modal {
+      width: 520px;
+      max-width: calc(100vw - 32px);
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      animation: slideup 200ms ease;
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+    }
+
+    .cm-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cm-tab {
+      height: 36px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-500);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .cm-tab:hover {
+      color: var(--gray-700);
+    }
+
+    .cm-tab.active {
+      background: var(--brand-50);
+      color: var(--brand-700);
+    }
+
+    .cm-search {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .cm-search input {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px 0 42px;
+      background: var(--gray-50);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .cm-search input:focus {
+      background: #fff;
+      border-color: var(--brand-500);
+      box-shadow: 0 0 0 4px rgba(61, 85, 204, 0.12);
+    }
+
+    .cm-search .icon {
+      position: absolute;
+      left: 34px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+      display: flex;
+    }
+
+    .cm-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px;
+    }
+
+    .cm-list:empty+.cm-empty {
+      display: flex;
+    }
+
+    .cm-row {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 120ms;
+    }
+
+    .cm-row:hover {
+      background: var(--brand-50);
+    }
+
+    .cm-row .who {
+      min-width: 0;
+    }
+
+    .cm-row .who .nm {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cm-row .who .phone {
+      font-size: 12px;
+      color: var(--gray-500);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cm-row .pts {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .cm-row .pts .n {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--brand-600);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cm-row .pts .lbl {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--gray-400);
+      text-transform: uppercase;
+    }
+
+    .cm-empty {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--gray-500);
+    }
+
+    .cm-empty h4 {
+      margin: 12px 0 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .cm-empty p {
+      margin: 0 0 12px;
+      font-size: 13px;
+    }
+
+    /* register pane */
+    .cm-register {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    .cm-register .helper {
+      padding: 10px 12px;
+      background: var(--brand-50);
+      border: 1px solid var(--brand-100);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--brand-700);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .cm-register .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    /* ---------- Checkout overlay ---------- */
+    .checkout-modal {
+      width: 540px;
+      max-width: calc(100vw - 32px);
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      animation: slideup 200ms ease;
+      display: flex;
+      flex-direction: column;
+      max-height: 92vh;
+    }
+
+    .ck-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ck-head h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .ck-head .ck-sub {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    .ck-head .pay-pill {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--brand-50);
+      color: var(--brand-700);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .ck-head .close-x {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      color: var(--gray-500);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ck-head .close-x:hover {
+      background: var(--gray-100);
+      color: var(--gray-800);
+    }
+
+    .ck-body {
+      padding: 24px 22px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .ck-total-display {
+      text-align: center;
+      padding: 18px 0 22px;
+    }
+
+    .ck-total-display .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .ck-total-display .amount {
+      font-size: 44px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--gray-900);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
+    /* Cash pane */
+    .cash-input {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .cash-input .currency {
+      display: none;
+    }
+
+    .cash-input input {
+      width: 100%;
+      height: 64px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--gray-50);
+      padding: 0 18px;
+      font-size: 26px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--gray-900);
+      outline: none;
+      transition: border-color 120ms, background 120ms;
+    }
+
+    .cash-input input:focus {
+      border-color: var(--brand-500);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(61, 85, 204, 0.12);
+    }
+
+    .cash-chips {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .cash-chip {
+      height: 38px;
+      border-radius: 9px;
+      background: var(--gray-50);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-700);
+      transition: all 120ms;
+    }
+
+    .cash-chip:hover {
+      border-color: var(--brand-300);
+      color: var(--brand-700);
+    }
+
+    .cash-chip.exact {
+      background: var(--brand-50);
+      color: var(--brand-700);
+      border-color: var(--brand-100);
+    }
+
+    .change-card {
+      padding: 14px 18px;
+      background: var(--gray-50);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .change-card .lbl {
+      font-size: 13px;
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+
+    .change-card .val {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--success-700);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .change-card.short .val {
+      color: var(--danger-500);
+    }
+
+    .change-card.short .lbl {
+      color: var(--danger-700);
+    }
+
+    /* Card pane */
+    .card-pane {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .edc {
+      width: 200px;
+      height: 130px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, var(--gray-900) 0%, var(--gray-700) 100%);
+      position: relative;
+      margin: 16px 0 22px;
+      box-shadow: 0 16px 30px -10px rgba(0, 0, 0, 0.25);
+    }
+
+    .edc::before {
+      content: '';
+      position: absolute;
+      width: 130px;
+      height: 24px;
+      background: var(--gray-300);
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 4px;
+    }
+
+    .edc .screen {
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130px;
+      height: 38px;
+      background: rgba(61, 85, 204, 0.18);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .edc .screen .blink {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+    }
+
+    .edc .slot {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 4px;
+      background: var(--gray-800);
+      border-radius: 2px;
+    }
+
+    .card-pulse {
+      position: absolute;
+      inset: -20px;
+      border: 3px solid var(--brand-500);
+      border-radius: 24px;
+      opacity: 0;
+      animation: pulse 1.6s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.96);
+        opacity: 0.6;
+      }
+
+      100% {
+        transform: scale(1.08);
+        opacity: 0;
+      }
+    }
+
+    .card-status {
+      text-align: center;
+    }
+
+    .card-status .title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 6px;
+    }
+
+    .card-status .sub {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .card-status .dots {
+      display: inline-flex;
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .card-status .dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--brand-500);
+      animation: bob 1.4s ease-in-out infinite;
+    }
+
+    .card-status .dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .card-status .dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bob {
+
+      0%,
+      80%,
+      100% {
+        transform: translateY(0);
+        opacity: 0.4;
+      }
+
+      40% {
+        transform: translateY(-6px);
+        opacity: 1;
+      }
+    }
+
+    /* QR pane */
+    .qr-pane {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 0 0;
+    }
+
+    .qr-wrap {
+      padding: 14px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .qr-corner {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border: 3px solid var(--brand-500);
+    }
+
+    .qr-corner.tl {
+      top: -3px;
+      left: -3px;
+      border-right: 0;
+      border-bottom: 0;
+      border-top-left-radius: 8px;
+    }
+
+    .qr-corner.tr {
+      top: -3px;
+      right: -3px;
+      border-left: 0;
+      border-bottom: 0;
+      border-top-right-radius: 8px;
+    }
+
+    .qr-corner.bl {
+      bottom: -3px;
+      left: -3px;
+      border-right: 0;
+      border-top: 0;
+      border-bottom-left-radius: 8px;
+    }
+
+    .qr-corner.br {
+      bottom: -3px;
+      right: -3px;
+      border-left: 0;
+      border-top: 0;
+      border-bottom-right-radius: 8px;
+    }
+
+    .qr-pane .help {
+      text-align: center;
+      font-size: 13px;
+      color: var(--gray-600);
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    .qr-bank-row {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .qr-bank {
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--gray-50);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-600);
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Checkout foot actions */
+    .ck-foot {
+      padding: 14px 22px;
+      background: var(--gray-50);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+    }
+
+    .ck-foot .btn {
+      flex: 1;
+    }
+
+    .ck-foot .btn-primary {
+      flex: 1.4;
+    }
+
+    /* ---------- Receipt ---------- */
+    .receipt-modal {
+      width: 720px;
+      max-width: calc(100vw - 32px);
+      max-height: 92vh;
+      background: var(--gray-50);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      animation: slideup 200ms ease;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+    }
+
+    .receipt {
+      background: #fff;
+      margin: 24px;
+      padding: 26px 24px 32px;
+      border-radius: 6px;
+      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.12);
+      font-family: 'Inter', monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--gray-800);
+      max-height: calc(92vh - 48px);
+      overflow-y: auto;
+      /* receipt edge effect */
+      position: relative;
+    }
+
+    .receipt::before,
+    .receipt::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 12px;
+      background: radial-gradient(circle at 8px 0, transparent 5px, #fff 5.5px);
+      background-size: 16px 12px;
+      background-repeat: repeat-x;
+    }
+
+    .receipt::before {
+      top: -6px;
+    }
+
+    .receipt::after {
+      bottom: -6px;
+      transform: scaleY(-1);
+    }
+
+    .receipt h4 {
+      margin: 0;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .receipt .rc-meta {
+      text-align: center;
+      color: var(--gray-500);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .receipt .rc-info {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 4px 12px;
+      margin: 16px 0;
+      font-size: 12px;
+    }
+
+    .receipt .rc-info .k {
+      color: var(--gray-500);
+    }
+
+    .receipt .rc-info .v {
+      color: var(--gray-900);
+      font-weight: 500;
+      text-align: right;
+    }
+
+    .receipt .sep {
+      border: none;
+      border-top: 1px dashed var(--gray-300);
+      margin: 12px 0;
+    }
+
+    .receipt .rc-line {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .receipt .rc-line .nm {
+      font-weight: 600;
+      color: var(--gray-900);
+      font-size: 12px;
+    }
+
+    .receipt .rc-line .qty {
+      grid-column: 1 / -1;
+      color: var(--gray-500);
+      font-size: 11px;
+      margin-top: -2px;
+    }
+
+    .receipt .rc-line .ln-total {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    .receipt .rc-line .ln-disc {
+      grid-column: 1 / -1;
+      color: var(--success-700);
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .receipt .rc-totals {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .receipt .rc-totals .row {
+      display: flex;
+      justify-content: space-between;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .receipt .rc-totals .row.disc {
+      color: var(--success-700);
+    }
+
+    .receipt .rc-totals .row.grand {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-top: 6px;
+    }
+
+    .receipt .thanks {
+      text-align: center;
+      margin-top: 16px;
+      color: var(--gray-500);
+      font-size: 11px;
+    }
+
+    .receipt .thanks .big {
+      color: var(--brand-600);
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+
+    .receipt .loyalty {
+      margin-top: 12px;
+      padding: 10px;
+      background: var(--brand-50);
+      border: 1px dashed var(--brand-200);
+      border-radius: 8px;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .receipt .loyalty .pts {
+      font-weight: 700;
+      color: var(--brand-700);
+      font-size: 14px;
+    }
+
+    .barcode {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .barcode svg {
+      width: 180px;
+      height: 40px;
+    }
+
+    .barcode-num {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: var(--gray-500);
+    }
+
+    .rc-side {
+      padding: 26px 22px;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .rc-side h4 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .rc-side .sub {
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-bottom: 18px;
+    }
+
+    .rc-success {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: var(--success-50);
+      border: 1px solid #A7F3D0;
+      border-radius: 10px;
+      color: var(--success-700);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .rc-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .rc-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      text-align: left;
+      transition: all 120ms;
+    }
+
+    .rc-action:hover {
+      border-color: var(--brand-300);
+      background: var(--brand-50);
+    }
+
+    .rc-action:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .rc-action:disabled:hover {
+      border-color: var(--border);
+      background: #fff;
+    }
+
+    .rc-action .ic {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: var(--gray-50);
+      color: var(--brand-600);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .rc-action .body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rc-action .ttl {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-900);
+      line-height: 1.2;
+    }
+
+    .rc-action .desc {
+      font-size: 11px;
+      color: var(--gray-500);
+      margin-top: 2px;
+    }
+
+    .rc-action.sent {
+      background: var(--success-50);
+      border-color: #A7F3D0;
+    }
+
+    .rc-action.sent .ic {
+      background: var(--success-500);
+      color: #fff;
+    }
+
+    .rc-side .done-row {
+      margin-top: auto;
+      padding-top: 16px;
+    }
+
+    .rc-side .done-row .btn {
+      width: 100%;
+    }
+
+    /* Success toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--gray-900);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms, transform 200ms;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast .toast-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--success-500);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Choice Cards */
+    .rc-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .rc-choice-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px;
+      border-radius: var(--r-xl);
+      border: 2px solid var(--border);
+      background: #fff;
+      text-align: left;
+      transition: all 200ms ease;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .rc-choice-card:hover {
+      border-color: var(--brand-300);
+      background: var(--brand-50);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .rc-choice-card.active-choice {
+      border-color: var(--brand-500);
+      background: var(--brand-50);
+    }
+
+    .rc-choice-icons {
+      display: flex;
+      position: relative;
+      height: 38px;
+      width: 38px;
+      flex-shrink: 0;
+    }
+
+    .rc-choice-icons .ic-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gray-100);
+      color: var(--gray-600);
+      border: 2px solid #fff;
+    }
+
+    .rc-choice-icons .ic-badge.printer {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .rc-choice-icons .ic-badge.wa {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      background: #25D366;
+      color: #fff;
+    }
+
+    .rc-choice-card:hover .ic-badge.printer {
+      background: var(--brand-500);
+      color: #fff;
+    }
+
+    .rc-choice-card.active-choice .ic-badge.printer {
+      background: var(--brand-500);
+      color: #fff;
+    }
+
+    .rc-choice-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rc-choice-content .ttl {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 2px;
+    }
+
+    .rc-choice-content .desc {
+      display: block;
+      font-size: 11px;
+      color: var(--gray-500);
+      line-height: 1.4;
+    }
+
+    .rc-choice-content .meta-info {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: var(--r-full);
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
+
+    .rc-choice-card.active-choice .meta-info {
+      background: var(--brand-100);
+      color: var(--brand-800);
+    }
+
+    .wa-input-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 14px;
+      border-radius: var(--r-lg);
+      background: var(--gray-50);
+      border: 1px solid var(--border);
+      margin-top: -6px;
+      margin-bottom: 6px;
+      animation: slideup 150ms ease;
+    }
+
+    .wa-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .wa-input-wrapper .prefix {
+      position: absolute;
+      left: 10px;
+      font-size: 14px;
+      color: var(--gray-400);
+    }
+
+    .wa-input-wrapper input {
+      width: 100%;
+      height: 36px;
+      padding: 0 10px 0 24px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border-strong);
+      outline: none;
+      font-size: 13px;
+      transition: all 120ms ease;
+    }
+
+    .wa-input-wrapper input:focus {
+      border-color: #25D366;
+      box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.15);
+      background: #fff;
+    }
+
+    /* Status Panel styling */
+    .rc-status-panel {
+      background: var(--gray-50);
+      border: 1.5px dashed var(--border-strong);
+      border-radius: var(--r-xl);
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      animation: fadein 200ms ease;
+    }
+
+    .rc-status-panel .status-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin: 8px 0;
+    }
+
+    .spinner-small {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--gray-200);
+      border-top: 2px solid var(--brand-500);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .status-success-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-success-message .success-icon-check {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--success-500);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      animation: scaleup-check 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes scaleup-check {
+      from {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .status-success-message h3 {
+      margin: 8px 0 2px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--success-700);
+    }
+
+    .status-success-message p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    /* Store Selector styles */
+    .store-grid-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 4px 2px;
+    }
+
+    .store-item-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+      transition: all 150ms ease;
+      width: 100%;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .store-item-btn:hover {
+      border-color: var(--brand-400);
+      background: var(--brand-50);
+    }
+
+    .store-item-btn.selected {
+      border-color: var(--brand-600);
+      background: var(--brand-50);
+    }
+
+    .store-item-btn.selected .check-icon {
+      opacity: 1 !important;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="app">
-  <!-- ============ Sidebar ============ -->
-  <aside class="sidebar" id="nav">
-    <div class="side-logo">
-      <div class="logo-mark">K</div>
-<span>KPoin</span>
-    </div>
-
-    <div class="sidebar-nav-scroll scroll">
-    <div class="nav-section-label">Main Section</div>
-    <nav class="nav">
-      <div class="nav-item active" data-screen-label="Nav · Order" onclick="window.location.href='order.html'">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-          <polyline points="22 4 12 14.01 9 11.01" />
-        </svg>
-        Order
-        <span class="nav-badge" id="navCount">0</span>
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Products & Inventory" onclick="window.location.href='inventory.html'">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path
-            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-          <line x1="12" y1="22.08" x2="12" y2="12" />
-        </svg>
-        Products & Inventory
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Customer" onclick="window.location.href='customer.html'">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-        Customer
-      </div>
-    </nav>
-
-    <div class="nav-section-label">Reports Section</div>
-    <nav class="nav">
-      <div class="nav-item" data-screen-label="Nav · Summary Report" onclick="window.location.href='report-summary.html'">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="20" x2="18" y2="10" />
-          <line x1="12" y1="20" x2="12" y2="4" />
-          <line x1="6" y1="20" x2="6" y2="14" />
-        </svg>
-        Summary Report
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Detail Report" onclick="window.location.href='report-detail.html'">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-          <line x1="9" y1="3" x2="9" y2="21" />
-          <line x1="15" y1="3" x2="15" y2="21" />
-          <line x1="3" y1="9" x2="21" y2="9" />
-          <line x1="3" y1="15" x2="21" y2="15" />
-        </svg>
-        Detail Report
-      </div>
-    </nav>
-
-    <div class="nav-section-label">Finance</div>
-    <nav class="nav">
-      <div class="nav-item" data-screen-label="Nav · Transaction Details" onclick="window.location.href='finance-transaction.html'">
-        <span class="nav-icon">📋</span> Transaction Details
-      </div>
-      <div class="nav-item" data-screen-label="Nav · P&L Summary" onclick="window.location.href='finance-pl-summary.html'">
-        <span class="nav-icon">💰</span> P&L Summary
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Product Profitability" onclick="window.location.href='finance-product-profit.html'">
-        <span class="nav-icon">📦</span> Product Profitability
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Store Profitability" onclick="window.location.href='finance-store-profit.html'">
-        <span class="nav-icon">🏪</span> Store Profitability
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Cost Analysis" onclick="window.location.href='finance-cost-analysis.html'">
-        <span class="nav-icon">📊</span> Cost Analysis
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Margin Analysis" onclick="window.location.href='finance-margin-analysis.html'">
-        <span class="nav-icon">📈</span> Margin Analysis
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Daily P&L" onclick="window.location.href='finance-daily-pl.html'">
-        <span class="nav-icon">📅</span> Daily P&L
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Finance Config" onclick="window.location.href='finance-config.html'">
-        <span class="nav-icon">⚙️</span> Finance Config
-      </div>
-    </nav>
-
-    <div class="nav-section-label">Config Section</div>
-    <nav class="nav">
-      <div class="nav-item" data-screen-label="Nav · Promo & Discount" onclick="window.location.href='promo.html'">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="5" x2="5" y2="19" />
-          <circle cx="7.5" cy="7.5" r="2" />
-          <circle cx="16.5" cy="16.5" r="2" />
-        </svg>
-        Promo & Discount
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Store List" onclick="window.location.href='store.html'">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 9.58V21a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9.58" />
-          <path d="M3 3h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
-          <path d="M12 9v14" />
-        </svg>
-        Store List
-      </div>
-      <div class="nav-item" data-screen-label="Nav · Staff List" onclick="window.location.href='staff.html'">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-        Staff List
-      </div>
-    </nav>
-
-    
-    </div>
-
-
-
-    
-    <div class="side-user">
-      <div class="avatar">SA</div>
-      <div class="who">
-        <div class="name">Super Admin</div>
-        <div class="role">Super Admin · Store #04</div>
-      </div>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="9 18 15 12 9 6" />
-      </svg>
-    </div>
-  </aside>
-
-  <!-- ============ Main ============ -->
-  <section class="main" data-screen-label="Order · Main">
-    <header class="main-head">
-      <div class="title">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <h1>New order</h1>
-          <button id="topStoreBadge" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 12px; height: 26px; border-radius: 999px; background: var(--brand-50); color: var(--brand-700); border: 1px solid var(--brand-200); font-weight: 600; cursor: pointer; transition: all 150ms ease;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/></svg>
-            <span id="topStoreName">Store #04</span>
-          </button>
-        </div>
-        <div class="sub" id="topHeaderSub">Counter · Tuesday, May 21 · 14:08</div>
+  <div class="app">
+    <!-- ============ Sidebar ============ -->
+    <aside class="sidebar" id="nav">
+      <div class="side-logo">
+        <div class="logo-mark">K</div>
+        <span>KPoin</span>
       </div>
 
-      <div class="search">
-        <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-        <input id="searchInput" type="text" placeholder="Search product or scan barcode…" />
-        <span class="kbd">⌘ K</span>
+      <div class="sidebar-nav-scroll scroll">
+        <div class="nav-section-label">Main Section</div>
+        <nav class="nav">
+          <div class="nav-item active" data-screen-label="Nav · Order" onclick="window.location.href='order.html'">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            Order
+            <span class="nav-badge" id="navCount">0</span>
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Products & Inventory"
+            onclick="window.location.href='inventory.html'">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
+            Products & Inventory
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Customer" onclick="window.location.href='customer.html'">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            Customer
+          </div>
+        </nav>
+
+        <div class="nav-section-label">Reports Section</div>
+        <nav class="nav">
+          <div class="nav-item" data-screen-label="Nav · Summary Report"
+            onclick="window.location.href='report-summary.html'">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+            Summary Report
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Detail Report"
+            onclick="window.location.href='report-detail.html'">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+              <line x1="15" y1="3" x2="15" y2="21" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <line x1="3" y1="15" x2="21" y2="15" />
+            </svg>
+            Detail Report
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Held Orders"
+            onclick="window.location.href='held-orders-dashboard.html'">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            Held Orders
+          </div>
+        </nav>
+
+        <div class="nav-section-label">Finance</div>
+        <nav class="nav">
+          <div class="nav-item" data-screen-label="Nav · Transaction Details"
+            onclick="window.location.href='finance-transaction.html'">
+            <span class="nav-icon">📋</span> Transaction Details
+          </div>
+          <div class="nav-item" data-screen-label="Nav · P&L Summary"
+            onclick="window.location.href='finance-pl-summary.html'">
+            <span class="nav-icon">💰</span> P&L Summary
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Product Profitability"
+            onclick="window.location.href='finance-product-profit.html'">
+            <span class="nav-icon">📦</span> Product Profitability
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Store Profitability"
+            onclick="window.location.href='finance-store-profit.html'">
+            <span class="nav-icon">🏪</span> Store Profitability
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Cost Analysis"
+            onclick="window.location.href='finance-cost-analysis.html'">
+            <span class="nav-icon">📊</span> Cost Analysis
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Margin Analysis"
+            onclick="window.location.href='finance-margin-analysis.html'">
+            <span class="nav-icon">📈</span> Margin Analysis
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Daily P&L"
+            onclick="window.location.href='finance-daily-pl.html'">
+            <span class="nav-icon">📅</span> Daily P&L
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Finance Config"
+            onclick="window.location.href='finance-config.html'">
+            <span class="nav-icon">⚙️</span> Finance Config
+          </div>
+        </nav>
+
+        <div class="nav-section-label">Config Section</div>
+        <nav class="nav">
+          <div class="nav-item" data-screen-label="Nav · Promo & Discount" onclick="window.location.href='promo.html'">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="5" x2="5" y2="19" />
+              <circle cx="7.5" cy="7.5" r="2" />
+              <circle cx="16.5" cy="16.5" r="2" />
+            </svg>
+            Promo & Discount
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Store List" onclick="window.location.href='store.html'">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 9.58V21a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9.58" />
+              <path d="M3 3h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+              <path d="M12 9v14" />
+            </svg>
+            Store List
+          </div>
+          <div class="nav-item" data-screen-label="Nav · Staff List" onclick="window.location.href='staff.html'">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            Staff List
+          </div>
+        </nav>
+
+
       </div>
 
-      <button class="icon-btn" title="Scan barcode">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v14M7 5v14M11 5v14M15 5v14M19 5v14"/></svg>
-      </button>
-      <button class="icon-btn with-dot" title="Notifications">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="dot"></span>
-      </button>
-    </header>
 
-    <div class="cats" id="cats"></div>
 
-    <div class="toolbar">
-      <span class="muted" id="resultCount">12 products</span>
-      <div style="flex:1"></div>
-      <span class="muted">Sort:</span>
-      <select class="sort-select" id="sort">
-        <option value="popular">Most popular</option>
-        <option value="az">Name A → Z</option>
-        <option value="price-low">Price · low</option>
-        <option value="price-high">Price · high</option>
-      </select>
-    </div>
 
-    <div class="grid scroll" id="grid"></div>
-  </section>
-
-  <!-- ============ Cart ============ -->
-  <aside class="cart" data-screen-label="Order · Cart">
-    <div class="cart-head">
-      <div class="row">
-        <h2>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-          Current Order
-          <span class="order-id" style="margin-left:6px;">#A-1042</span>
-        </h2>
-        <button class="clear-btn" id="clearBtn">Clear</button>
-      </div>
-
-      <div class="customer-bar" id="customerBar">
-        <div class="avatar" style="width:30px; height:30px; font-size:11px; background: var(--gray-100); color: var(--gray-500);">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
-        </div>
+      <div class="side-user">
+        <div class="avatar">SA</div>
         <div class="who">
-          <div class="name">Walk-in customer</div>
-          <div class="meta">Tap to add customer</div>
+          <div class="name">Super Admin</div>
+          <div class="role">Super Admin · Store #04</div>
         </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
       </div>
+    </aside>
 
-      <div class="order-type" role="tablist">
-        <button class="active" data-type="dinein"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18"/><path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M5 18v3"/><path d="M19 18v3"/><path d="M3 18h18"/></svg>Dine-in</button>
-        <button data-type="takeaway"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l-2 18H8L6 3z"/><path d="M9 3v3M15 3v3"/></svg>Take-away</button>
-        <button data-type="delivery"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Delivery</button>
-      </div>
-    </div>
-
-    <div class="cart-items scroll" id="cartItems"></div>
-
-    <div class="cart-foot">
-      <div class="applied-promo" id="appliedPromo">
-        <span><strong id="promoCode">SAVE10</strong> · 10% off applied</span>
-        <button class="remove-promo" id="removePromo" title="Remove promo">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-
-      <div class="promo" id="promoForm">
-        <input id="promoInput" type="text" placeholder="Promo code (try SAVE10)" />
-        <button id="applyPromo">Apply</button>
-      </div>
-
-      <div class="totals">
-        <div class="row"><span>Subtotal</span><span class="num" id="sumSubtotal">Rp 0.00</span></div>
-        <div class="row discount" id="discountRow" style="display:none;"><span id="discountLabel">Discount</span><span class="num" id="sumDiscount">-Rp 0.00</span></div>
-        <div class="row"><span>Tax (8%)</span><span class="num" id="sumTax">Rp 0.00</span></div>
-        <div class="grand">
-          <span class="label">Total</span>
-          <span class="val" id="sumGrand">Rp 0.00</span>
-        </div>
-      </div>
-
-      <div class="pay-select">
-        <button class="pay-btn active" data-pay="cash">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
-          Cash
-        </button>
-        <button class="pay-btn" data-pay="card">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          Card
-        </button>
-        <button class="pay-btn" data-pay="qr">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM17 17h4v4h-4z"/></svg>
-          QR Pay
-        </button>
-      </div>
-
-      <div class="checkout-row">
-        <button class="hold" id="holdBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-          Hold
-        </button>
-        <button class="checkout" id="checkoutBtn" disabled>
-          Checkout
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-      </div>
-    </div>
-  </aside>
-</div>
-
-<!-- ============ Checkout modal ============ -->
-<div class="scrim" id="checkoutScrim">
-  <div class="checkout-modal" id="checkoutModal">
-    <div class="ck-head">
-      <h3 id="ckTitle">Checkout</h3>
-      <span class="pay-pill" id="ckPayPill">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/></svg>
-        <span id="ckPayLabel">Cash</span>
-      </span>
-      <button class="close-x" id="ckClose" aria-label="close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-
-    <div class="ck-body" id="ckBody">
-
-      <!-- POINTS REDEMPTION PANE -->
-      <div id="ckPaneRedeem" class="redeem-pane" style="display: none; margin-bottom: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--gray-50);">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+    <!-- ============ Main ============ -->
+    <section class="main" data-screen-label="Order · Main">
+      <header class="main-head">
+        <div class="title">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand-600)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
-            <strong style="font-size: 14px; color: var(--gray-900); font-weight: 600;">Redeem Loyalty Points</strong>
-          </div>
-          <span id="ckRedeemStatus" style="background: var(--brand-50); color: var(--brand-700); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px;">0 pts available</span>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <div style="position: relative; flex: 1;">
-            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--gray-500); font-weight: 600;">Points</span>
-            <input id="ckRedeemInput" type="number" min="0" placeholder="0" style="width: 100%; height: 38px; padding: 8px 12px 8px 60px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-weight: 500;" />
-          </div>
-          <button id="ckRedeemMaxBtn" class="btn btn-secondary" style="padding: 8px 16px; font-size: 12px; height: 38px; font-weight: 600;">Max</button>
-        </div>
-        <div id="ckRedeemMsg" style="font-size: 12px; margin-top: 8px; font-weight: 500; display: none;"></div>
-      </div>
-
-      <!-- CASH PANE -->
-      <div id="ckPaneCash">
-        <div class="ck-total-display">
-          <div class="label">Amount due</div>
-          <div class="amount" id="ckCashAmount">Rp 0.00</div>
-        </div>
-        <div class="cash-input">
-          <input id="ckCashInput" type="text" inputmode="decimal" placeholder="Rp 0" autocomplete="off" />
-        </div>
-        <div class="cash-chips" id="ckCashChips"></div>
-        <div class="change-card" id="ckChangeCard">
-          <span class="lbl" id="ckChangeLabel">Change due</span>
-          <span class="val" id="ckChangeVal">Rp 0.00</span>
-        </div>
-      </div>
-
-      <!-- CARD PANE -->
-      <div id="ckPaneCard" style="display:none;">
-        <div class="card-pane">
-          <div class="ck-total-display" style="padding-top:0;">
-            <div class="label">Charging</div>
-            <div class="amount" id="ckCardAmount">Rp 0.00</div>
-          </div>
-          <div style="position:relative;">
-            <div class="edc">
-              <div class="screen"><span class="blink" id="edcScreenText">PROCESSING…</span></div>
-              <div class="slot"></div>
-            </div>
-            <div class="card-pulse"></div>
-          </div>
-          <div class="card-status" id="ckCardStatus">
-            <div class="title">Waiting for terminal…</div>
-            <div class="sub">Please insert, swipe, or tap card on the EDC machine.</div>
-            <div class="dots"><span></span><span></span><span></span></div>
-          </div>
-          <div style="margin-top: 16px; text-align: center;">
-            <button id="ckTriggerEDC" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              Process EDC Payment
+            <h1>New order</h1>
+            <button id="topStoreBadge" class="btn btn-secondary btn-sm"
+              style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 12px; height: 26px; border-radius: 999px; background: var(--brand-50); color: var(--brand-700); border: 1px solid var(--brand-200); font-weight: 600; cursor: pointer; transition: all 150ms ease;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+              </svg>
+              <span id="topStoreName">Store #04</span>
             </button>
           </div>
+          <div class="sub" id="topHeaderSub">Counter · Tuesday, May 21 · 14:08</div>
         </div>
-      </div>
 
-      <!-- QR PANE -->
-      <div id="ckPaneQR" style="display:none;">
-        <div class="ck-total-display">
-          <div class="label">Scan to pay</div>
-          <div class="amount" id="ckQRAmount">Rp 0.00</div>
+        <div class="search">
+          <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg></span>
+          <input id="searchInput" type="text" placeholder="Search product or scan barcode…" />
+          <span class="kbd">⌘ K</span>
         </div>
-        <div class="qr-pane">
-          <div class="qr-wrap">
-            <span class="qr-corner tl"></span><span class="qr-corner tr"></span>
-            <span class="qr-corner bl"></span><span class="qr-corner br"></span>
-            <svg id="ckQR" width="220" height="220" viewBox="0 0 33 33"></svg>
-          </div>
-          <div class="qr-bank-row">
-            <span class="qr-bank">PayNow</span>
-            <span class="qr-bank">GrabPay</span>
-            <span class="qr-bank">Apple Pay</span>
-            <span class="qr-bank">QRIS</span>
-          </div>
-          <div class="help">Open your bank or wallet app, scan the code above, and confirm the amount.</div>
-        </div>
-      </div>
 
-    </div>
-
-    <div class="ck-foot">
-      <button class="btn btn-secondary" id="ckCancel">Cancel</button>
-      <button class="btn btn-primary" id="ckConfirm">Confirm payment</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ Receipt modal ============ -->
-<div class="scrim" id="receiptScrim">
-  <div class="receipt-modal" id="receiptModal">
-    <!-- left: printable receipt -->
-    <div class="receipt scroll" id="receiptPaper"></div>
-
-    <!-- right: action panel -->
-    <aside class="rc-side">
-      <h4>Payment complete</h4>
-      <div class="sub">Order <span id="rcOrderId">#A-1042</span> · <span id="rcTime">14:08</span></div>
-
-      <div class="rc-success">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span><strong id="rcAmount">Rp 0.00</strong> received via <span id="rcMethod">cash</span></span>
-      </div>
-
-      <!-- Receipt options choice panel -->
-      <div class="rc-choices" id="rcChoices">
-        <h5 style="margin: 0 0 12px; font-size: 13px; font-weight: 600; color: var(--gray-700);">How would you like your receipt?</h5>
-        
-        <!-- Choice 1: Print & Send WhatsApp -->
-        <button class="rc-choice-card" id="choicePrintWA">
-          <div class="rc-choice-icons">
-            <span class="ic-badge printer">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            </span>
-            <span class="ic-badge wa">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-            </span>
-          </div>
-          <div class="rc-choice-content">
-            <span class="ttl">Print & WhatsApp Receipt</span>
-            <span class="desc">Print physical ticket and send copy to customer via WhatsApp</span>
-            <span class="meta-info" id="rcChoiceWAMeta">Walk-in customer</span>
-          </div>
+        <button class="icon-btn" title="Scan barcode">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 5v14M7 5v14M11 5v14M15 5v14M19 5v14" />
+          </svg>
         </button>
-
-        <!-- Walk-in WhatsApp Input Form -->
-        <div class="wa-input-container" id="waInputContainer" style="display: none;">
-          <div class="wa-input-wrapper">
-            <span class="prefix">+</span>
-            <input type="tel" id="waPhoneInput" placeholder="WhatsApp number (e.g. 14155550123)" autocomplete="off" />
-          </div>
-          <button class="btn btn-primary btn-sm" id="waSubmitBtn" disabled>Send & Print</button>
-        </div>
-
-        <!-- Choice 2: Just Print -->
-        <button class="rc-choice-card" id="choiceJustPrint">
-          <div class="rc-choice-icons">
-            <span class="ic-badge printer">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            </span>
-          </div>
-          <div class="rc-choice-content">
-            <span class="ttl">Just Print Receipt</span>
-            <span class="desc">Print physical receipt only</span>
-          </div>
+        <button class="icon-btn with-dot" title="Notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          <span class="dot"></span>
         </button>
+      </header>
+
+      <div class="cats" id="cats"></div>
+
+      <div class="toolbar">
+        <span class="muted" id="resultCount">12 products</span>
+        <div style="flex:1"></div>
+        <span class="muted">Sort:</span>
+        <select class="sort-select" id="sort">
+          <option value="popular">Most popular</option>
+          <option value="az">Name A → Z</option>
+          <option value="price-low">Price · low</option>
+          <option value="price-high">Price · high</option>
+        </select>
       </div>
 
-      <!-- Action status / progress panel -->
-      <div class="rc-status-panel" id="rcStatusPanel" style="display: none;">
-        <div class="status-item" id="statusPrint">
-          <span class="spinner-small"></span>
-          <span>Printing physical receipt...</span>
+      <div class="grid scroll" id="grid"></div>
+    </section>
+
+    <!-- ============ Cart ============ -->
+    <aside class="cart" data-screen-label="Order · Cart">
+      <div class="cart-head">
+        <div class="row" style="flex-wrap:nowrap;gap:8px;">
+          <h2
+            style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex-shrink:1;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;">
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+            Current Order <span class="order-id">#A-1042</span>
+          </h2>
+          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+            <button id="retrieveBtn" title="Retrieve a held order"
+              style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--brand-700);padding:4px 10px;border-radius:8px;background:var(--brand-50);border:1px solid var(--brand-200);transition:all 120ms;cursor:pointer;line-height:1;white-space:nowrap;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10" />
+                <path d="M3.51 15a9 9 0 1 0 .49-3.87" />
+              </svg>
+              Retrieve
+              <span id="holdBadge"
+                style="display:none;background:var(--brand-500);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;min-width:16px;text-align:center;line-height:16px;">0</span>
+            </button>
+            <button class="clear-btn" id="clearBtn">Clear</button>
+          </div>
         </div>
-        <div class="status-item" id="statusWA" style="display: none;">
-          <span class="spinner-small"></span>
-          <span>Sending WhatsApp copy...</span>
+
+        <div class="customer-bar" id="customerBar">
+          <div class="avatar"
+            style="width:30px; height:30px; font-size:11px; background: var(--gray-100); color: var(--gray-500);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="7" r="4" />
+              <path d="M5.5 21a6.5 6.5 0 0 1 13 0" />
+            </svg>
+          </div>
+          <div class="who">
+            <div class="name">Walk-in customer</div>
+            <div class="meta">Tap to add customer</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
         </div>
-        
-        <div class="status-success-message" id="statusSuccessMsg" style="display: none;">
-          <div class="success-icon-check">✓</div>
-          <h3 id="successTitle">Receipt Printed!</h3>
-          <p id="successDesc">Transaction completed successfully.</p>
+
+        <div class="order-type" role="tablist">
+          <button class="active" data-type="dinein"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 11h18" />
+              <path d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4" />
+              <path d="M5 18v3" />
+              <path d="M19 18v3" />
+              <path d="M3 18h18" />
+            </svg>Dine-in</button>
+          <button data-type="takeaway"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 3h12l-2 18H8L6 3z" />
+              <path d="M9 3v3M15 3v3" />
+            </svg>Take-away</button>
+          <button data-type="delivery"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 3h15v13H1z" />
+              <path d="M16 8h4l3 3v5h-7" />
+              <circle cx="5.5" cy="18.5" r="2.5" />
+              <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>Delivery</button>
         </div>
       </div>
 
-      <div class="done-row">
-        <button class="btn btn-primary btn-lg" id="rcDone">
-          New order
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
+      <div class="cart-items scroll" id="cartItems"></div>
+
+      <div class="cart-foot">
+        <div class="applied-promo" id="appliedPromo">
+          <span><strong id="promoCode">SAVE10</strong> · 10% off applied</span>
+          <button class="remove-promo" id="removePromo" title="Remove promo">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="promo" id="promoForm">
+          <input id="promoInput" type="text" placeholder="Promo code (try SAVE10)" />
+          <button id="applyPromo">Apply</button>
+        </div>
+
+        <div class="totals">
+          <div class="row"><span>Subtotal</span><span class="num" id="sumSubtotal">Rp 0.00</span></div>
+          <div class="row discount" id="discountRow" style="display:none;"><span id="discountLabel">Discount</span><span
+              class="num" id="sumDiscount">-Rp 0.00</span></div>
+          <div class="row"><span>Tax (8%)</span><span class="num" id="sumTax">Rp 0.00</span></div>
+          <div class="grand">
+            <span class="label">Total</span>
+            <span class="val" id="sumGrand">Rp 0.00</span>
+          </div>
+        </div>
+
+        <div class="pay-select">
+          <button class="pay-btn active" data-pay="cash">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2" />
+              <circle cx="12" cy="12" r="2" />
+              <path d="M6 12h.01M18 12h.01" />
+            </svg>
+            Cash
+          </button>
+          <button class="pay-btn" data-pay="card">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <line x1="2" y1="10" x2="22" y2="10" />
+            </svg>
+            Card
+          </button>
+          <button class="pay-btn" data-pay="qr">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+              <path d="M14 14h3v3h-3zM17 17h4v4h-4z" />
+            </svg>
+            QR Pay
+          </button>
+        </div>
+
+        <div class="checkout-row">
+          <button class="hold" id="holdBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="4" width="4" height="16" />
+              <rect x="14" y="4" width="4" height="16" />
+            </svg>
+            Hold
+          </button>
+          <button class="checkout" id="checkoutBtn" disabled>
+            Checkout
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </button>
+        </div>
       </div>
     </aside>
   </div>
-</div>
 
-<!-- ============ Customer modal ============ -->
-<div class="scrim" id="customerScrim">
-  <div class="cm-modal" id="customerModal">
-    <div class="modal-head" style="border-bottom:none; padding-bottom: 10px;">
-      <div class="thumb" style="background: var(--brand-50); color: var(--brand-600);">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  <!-- ============ Checkout modal ============ -->
+  <div class="scrim" id="checkoutScrim">
+    <div class="checkout-modal" id="checkoutModal">
+      <div class="ck-head">
+        <h3 id="ckTitle">Checkout</h3>
+        <span class="pay-pill" id="ckPayPill">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <rect x="2" y="6" width="20" height="12" rx="2" />
+          </svg>
+          <span id="ckPayLabel">Cash</span>
+        </span>
+        <button class="close-x" id="ckClose" aria-label="close"><svg width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
       </div>
-      <div>
-        <h3 id="cmTitle">Add customer</h3>
-        <div class="sub" id="cmSub">Search by phone number or name</div>
+
+      <div class="ck-body" id="ckBody">
+
+        <!-- POINTS REDEMPTION PANE -->
+        <div id="ckPaneRedeem" class="redeem-pane"
+          style="display: none; margin-bottom: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--gray-50);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand-600)" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+              </svg>
+              <strong style="font-size: 14px; color: var(--gray-900); font-weight: 600;">Redeem Loyalty Points</strong>
+            </div>
+            <span id="ckRedeemStatus"
+              style="background: var(--brand-50); color: var(--brand-700); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px;">0
+              pts available</span>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="position: relative; flex: 1;">
+              <span
+                style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--gray-500); font-weight: 600;">Points</span>
+              <input id="ckRedeemInput" type="number" min="0" placeholder="0"
+                style="width: 100%; height: 38px; padding: 8px 12px 8px 60px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-weight: 500;" />
+            </div>
+            <button id="ckRedeemMaxBtn" class="btn btn-secondary"
+              style="padding: 8px 16px; font-size: 12px; height: 38px; font-weight: 600;">Max</button>
+          </div>
+          <div id="ckRedeemMsg" style="font-size: 12px; margin-top: 8px; font-weight: 500; display: none;"></div>
+        </div>
+
+        <!-- CASH PANE -->
+        <div id="ckPaneCash">
+          <div class="ck-total-display">
+            <div class="label">Amount due</div>
+            <div class="amount" id="ckCashAmount">Rp 0.00</div>
+          </div>
+          <div class="cash-input">
+            <input id="ckCashInput" type="text" inputmode="decimal" placeholder="Rp 0" autocomplete="off" />
+          </div>
+          <div class="cash-chips" id="ckCashChips"></div>
+          <div class="change-card" id="ckChangeCard">
+            <span class="lbl" id="ckChangeLabel">Change due</span>
+            <span class="val" id="ckChangeVal">Rp 0.00</span>
+          </div>
+        </div>
+
+        <!-- CARD PANE -->
+        <div id="ckPaneCard" style="display:none;">
+          <div class="card-pane">
+            <div class="ck-total-display" style="padding-top:0;">
+              <div class="label">Charging</div>
+              <div class="amount" id="ckCardAmount">Rp 0.00</div>
+            </div>
+            <div style="position:relative;">
+              <div class="edc">
+                <div class="screen"><span class="blink" id="edcScreenText">PROCESSING…</span></div>
+                <div class="slot"></div>
+              </div>
+              <div class="card-pulse"></div>
+            </div>
+            <div class="card-status" id="ckCardStatus">
+              <div class="title">Waiting for terminal…</div>
+              <div class="sub">Please insert, swipe, or tap card on the EDC machine.</div>
+              <div class="dots"><span></span><span></span><span></span></div>
+            </div>
+            <div style="margin-top: 16px; text-align: center;">
+              <button id="ckTriggerEDC" class="btn btn-primary"
+                style="width: 100%; padding: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="5" width="20" height="14" rx="2" />
+                  <line x1="2" y1="10" x2="22" y2="10" />
+                </svg>
+                Process EDC Payment
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- QR PANE -->
+        <div id="ckPaneQR" style="display:none;">
+          <div class="ck-total-display">
+            <div class="label">Scan to pay</div>
+            <div class="amount" id="ckQRAmount">Rp 0.00</div>
+          </div>
+          <div class="qr-pane">
+            <div class="qr-wrap">
+              <span class="qr-corner tl"></span><span class="qr-corner tr"></span>
+              <span class="qr-corner bl"></span><span class="qr-corner br"></span>
+              <svg id="ckQR" width="220" height="220" viewBox="0 0 33 33"></svg>
+            </div>
+            <div class="qr-bank-row">
+              <span class="qr-bank">PayNow</span>
+              <span class="qr-bank">GrabPay</span>
+              <span class="qr-bank">Apple Pay</span>
+              <span class="qr-bank">QRIS</span>
+            </div>
+            <div class="help">Open your bank or wallet app, scan the code above, and confirm the amount.</div>
+          </div>
+        </div>
+
       </div>
-      <button class="close-x" id="cmClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+
+      <div class="ck-foot">
+        <button class="btn btn-secondary" id="ckCancel">Cancel</button>
+        <button class="btn btn-primary" id="ckConfirm">Confirm payment</button>
+      </div>
     </div>
+  </div>
 
-    <div class="cm-tabs" role="tablist">
-      <button class="cm-tab active" data-pane="search">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Find existing
-      </button>
-      <button class="cm-tab" data-pane="register">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-        Register new
-      </button>
+  <!-- ============ Receipt modal ============ -->
+  <div class="scrim" id="receiptScrim">
+    <div class="receipt-modal" id="receiptModal">
+      <!-- left: printable receipt -->
+      <div class="receipt scroll" id="receiptPaper"></div>
+
+      <!-- right: action panel -->
+      <aside class="rc-side">
+        <h4>Payment complete</h4>
+        <div class="sub">Order <span id="rcOrderId">#A-1042</span> · <span id="rcTime">14:08</span></div>
+
+        <div class="rc-success">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span><strong id="rcAmount">Rp 0.00</strong> received via <span id="rcMethod">cash</span></span>
+        </div>
+
+        <!-- Receipt options choice panel -->
+        <div class="rc-choices" id="rcChoices">
+          <h5 style="margin: 0 0 12px; font-size: 13px; font-weight: 600; color: var(--gray-700);">How would you like
+            your receipt?</h5>
+
+          <!-- Choice 1: Print & Send WhatsApp -->
+          <button class="rc-choice-card" id="choicePrintWA">
+            <div class="rc-choice-icons">
+              <span class="ic-badge printer">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+              </span>
+              <span class="ic-badge wa">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                </svg>
+              </span>
+            </div>
+            <div class="rc-choice-content">
+              <span class="ttl">Print & WhatsApp Receipt</span>
+              <span class="desc">Print physical ticket and send copy to customer via WhatsApp</span>
+              <span class="meta-info" id="rcChoiceWAMeta">Walk-in customer</span>
+            </div>
+          </button>
+
+          <!-- Walk-in WhatsApp Input Form -->
+          <div class="wa-input-container" id="waInputContainer" style="display: none;">
+            <div class="wa-input-wrapper">
+              <span class="prefix">+</span>
+              <input type="tel" id="waPhoneInput" placeholder="WhatsApp number (e.g. 14155550123)" autocomplete="off" />
+            </div>
+            <button class="btn btn-primary btn-sm" id="waSubmitBtn" disabled>Send & Print</button>
+          </div>
+
+          <!-- Choice 2: Just Print -->
+          <button class="rc-choice-card" id="choiceJustPrint">
+            <div class="rc-choice-icons">
+              <span class="ic-badge printer">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+              </span>
+            </div>
+            <div class="rc-choice-content">
+              <span class="ttl">Just Print Receipt</span>
+              <span class="desc">Print physical receipt only</span>
+            </div>
+          </button>
+        </div>
+
+        <!-- Action status / progress panel -->
+        <div class="rc-status-panel" id="rcStatusPanel" style="display: none;">
+          <div class="status-item" id="statusPrint">
+            <span class="spinner-small"></span>
+            <span>Printing physical receipt...</span>
+          </div>
+          <div class="status-item" id="statusWA" style="display: none;">
+            <span class="spinner-small"></span>
+            <span>Sending WhatsApp copy...</span>
+          </div>
+
+          <div class="status-success-message" id="statusSuccessMsg" style="display: none;">
+            <div class="success-icon-check">✓</div>
+            <h3 id="successTitle">Receipt Printed!</h3>
+            <p id="successDesc">Transaction completed successfully.</p>
+          </div>
+        </div>
+
+        <div class="done-row">
+          <button class="btn btn-primary btn-lg" id="rcDone">
+            New order
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </button>
+        </div>
+      </aside>
     </div>
+  </div>
 
-    <!-- SEARCH PANE -->
-    <div id="cmPaneSearch" style="display:flex; flex-direction:column; flex:1; min-height: 0;">
-      <div class="cm-search">
-        <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-        <input id="cmSearchInput" type="text" placeholder="Phone number or name…" autocomplete="off" />
+  <!-- ============ Customer modal ============ -->
+  <div class="scrim" id="customerScrim">
+    <div class="cm-modal" id="customerModal">
+      <div class="modal-head" style="border-bottom:none; padding-bottom: 10px;">
+        <div class="thumb" style="background: var(--brand-50); color: var(--brand-600);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </div>
+        <div>
+          <h3 id="cmTitle">Add customer</h3>
+          <div class="sub" id="cmSub">Search by phone number or name</div>
+        </div>
+        <button class="close-x" id="cmClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
       </div>
-      <div class="cm-list scroll" id="cmList"></div>
-      <div class="cm-empty" id="cmEmpty">
-        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <h4>No matching customer</h4>
-        <p>Try a different phone or name, or register a new one.</p>
-        <button class="btn btn-secondary btn-sm" id="cmGotoRegister">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Register new customer
+
+      <div class="cm-tabs" role="tablist">
+        <button class="cm-tab active" data-pane="search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          Find existing
+        </button>
+        <button class="cm-tab" data-pane="register">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <line x1="19" y1="8" x2="19" y2="14" />
+            <line x1="22" y1="11" x2="16" y2="11" />
+          </svg>
+          Register new
         </button>
       </div>
-    </div>
 
-    <!-- REGISTER PANE -->
-    <div id="cmPaneRegister" class="cm-register" style="display:none;">
-      <div class="helper">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span>New customers earn <strong>50 bonus points</strong> on first signup. They can complete their profile from the customer portal later.</span>
+      <!-- SEARCH PANE -->
+      <div id="cmPaneSearch" style="display:flex; flex-direction:column; flex:1; min-height: 0;">
+        <div class="cm-search">
+          <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg></span>
+          <input id="cmSearchInput" type="text" placeholder="Phone number or name…" autocomplete="off" />
+        </div>
+        <div class="cm-list scroll" id="cmList"></div>
+        <div class="cm-empty" id="cmEmpty">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <h4>No matching customer</h4>
+          <p>Try a different phone or name, or register a new one.</p>
+          <button class="btn btn-secondary btn-sm" id="cmGotoRegister">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Register new customer
+          </button>
+        </div>
       </div>
-      <div class="field">
-        <label class="field-label" for="regName">Full name</label>
-        <input class="input" id="regName" type="text" placeholder="e.g. Alex Morgan" autocomplete="off" />
+
+      <!-- REGISTER PANE -->
+      <div id="cmPaneRegister" class="cm-register" style="display:none;">
+        <div class="helper">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:1px;">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <span>New customers earn <strong>50 bonus points</strong> on first signup. They can complete their profile
+            from the customer portal later.</span>
+        </div>
+        <div class="field">
+          <label class="field-label" for="regName">Full name</label>
+          <input class="input" id="regName" type="text" placeholder="e.g. Alex Morgan" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="regPhone">Phone number</label>
+          <input class="input" id="regPhone" type="tel" placeholder="+1 555-000-0000" autocomplete="off" />
+          <div class="field-hint">Used for loyalty lookup and receipt SMS.</div>
+        </div>
+        <div id="regError" class="field-error" style="display:none;"></div>
+        <div class="actions">
+          <button class="btn btn-secondary" id="cmCancelRegister">Cancel</button>
+          <button class="btn btn-primary" id="cmDoRegister">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Save & attach
+          </button>
+        </div>
       </div>
-      <div class="field">
-        <label class="field-label" for="regPhone">Phone number</label>
-        <input class="input" id="regPhone" type="tel" placeholder="+1 555-000-0000" autocomplete="off" />
-        <div class="field-hint">Used for loyalty lookup and receipt SMS.</div>
+    </div>
+  </div>
+
+  <!-- ============ Variant modal ============ -->
+  <div class="scrim" id="scrim">
+    <div class="modal" id="variantModal">
+      <div class="modal-head">
+        <div class="thumb" id="vmThumb"></div>
+        <div>
+          <h3 id="vmName">Product</h3>
+          <div class="sub" id="vmSub">Choose options</div>
+        </div>
+        <button class="close-x" id="vmClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
       </div>
-      <div id="regError" class="field-error" style="display:none;"></div>
-      <div class="actions">
-        <button class="btn btn-secondary" id="cmCancelRegister">Cancel</button>
-        <button class="btn btn-primary" id="cmDoRegister">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Save & attach
+      <div class="modal-body" id="vmBody"></div>
+      <div class="modal-foot">
+        <div class="qty-stepper">
+          <button id="vmMinus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.4" stroke-linecap="round">
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg></button>
+          <div class="n" id="vmQty">1</div>
+          <button id="vmPlus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.4" stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg></button>
+        </div>
+        <button class="add-to-cart" id="vmAdd">
+          Add to order · <span class="price" id="vmPrice">Rp 0.00</span>
         </button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ============ Variant modal ============ -->
-<div class="scrim" id="scrim">
-  <div class="modal" id="variantModal">
-    <div class="modal-head">
-      <div class="thumb" id="vmThumb"></div>
-      <div>
-        <h3 id="vmName">Product</h3>
-        <div class="sub" id="vmSub">Choose options</div>
+  <!-- ============ Store Selector Modal ============ -->
+  <div class="scrim" id="storeSelectScrim">
+    <div class="modal" id="storeSelectModal"
+      style="width: 420px; max-width: calc(100vw - 32px); background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-lg); animation: slideup 200ms ease;">
+      <div class="modal-head" style="border-bottom: none; padding-bottom: 10px;">
+        <div class="thumb"
+          style="background: var(--brand-50); color: var(--brand-600); width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+        </div>
+        <div style="flex: 1;">
+          <h3 style="margin: 0 0 2px; font-size: 16px; font-weight: 700; color: var(--gray-900);">Select Store</h3>
+          <div class="sub" style="font-size: 12px; color: var(--gray-500);">Identify store to start transaction</div>
+        </div>
+        <button class="close-x" id="storeSelectClose" style="display: none;"><svg width="18" height="18"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
       </div>
-      <button class="close-x" id="vmClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="modal-body" id="vmBody"></div>
-    <div class="modal-foot">
-      <div class="qty-stepper">
-        <button id="vmMinus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-        <div class="n" id="vmQty">1</div>
-        <button id="vmPlus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <div style="padding: 16px 20px 24px;">
+        <div class="store-grid-container" id="storeListContainer">
+          <!-- populated dynamically -->
+        </div>
       </div>
-      <button class="add-to-cart" id="vmAdd">
-        Add to order · <span class="price" id="vmPrice">Rp 0.00</span>
-      </button>
     </div>
   </div>
-</div>
 
-<!-- ============ Store Selector Modal ============ -->
-<div class="scrim" id="storeSelectScrim">
-  <div class="modal" id="storeSelectModal" style="width: 420px; max-width: calc(100vw - 32px); background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-lg); animation: slideup 200ms ease;">
-    <div class="modal-head" style="border-bottom: none; padding-bottom: 10px;">
-      <div class="thumb" style="background: var(--brand-50); color: var(--brand-600); width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-          <circle cx="12" cy="10" r="3" />
+  <!-- ============ Hold Order Styles ============ -->
+  <style>
+    .hold-result-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+      transition: background 120ms, border-color 120ms;
+      cursor: pointer;
+    }
+
+    .hold-result-row:hover {
+      background: var(--brand-50);
+      border-color: var(--brand-200);
+    }
+
+    .hold-result-code {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      color: var(--brand-600);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hold-result-reason {
+      background: var(--brand-50);
+      color: var(--brand-700);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+    }
+
+    #retrieveBtn:hover {
+      background: var(--brand-100);
+      border-color: var(--brand-300);
+    }
+
+    @media print {
+      .hold-code-print {
+        display: block !important;
+        font-size: 36pt;
+        font-weight: 900;
+        letter-spacing: 0.2em;
+        text-align: center;
+        border: 4px solid #000;
+        padding: 16px;
+        margin: 24px auto;
+        width: fit-content;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+
+  <!-- ============ Hold Order Modal ============ -->
+  <div class="scrim" id="holdScrim">
+    <div id="holdModal"
+      style="width:440px;max-width:calc(100vw - 32px);background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-lg);animation:slideup 200ms ease;">
+      <div class="modal-head">
+        <div class="thumb" style="background:var(--brand-50);color:var(--brand-600);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </div>
+        <div>
+          <h3>Hold Order</h3>
+          <div class="sub" id="holdModalSub">Order saved — retrieve anytime with the hold code</div>
+        </div>
+        <button class="close-x" id="holdModalClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
+      </div>
+
+      <!-- Step 1: Form -->
+      <div id="holdFormSection" style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+        <div class="field">
+          <label class="field-label" for="holdReason">Reason for hold</label>
+          <select class="input" id="holdReason" style="cursor:pointer;">
+            <option value="customer_adding">Customer adding items</option>
+            <option value="break">Staff break</option>
+            <option value="backorder">Back-order</option>
+            <option value="queue">Queue management</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="holdNotes">Notes <span
+              style="color:var(--gray-400);font-weight:400;">(optional)</span></label>
+          <textarea class="input" id="holdNotes" rows="2" style="height:72px;padding-top:10px;resize:none;"
+            placeholder="e.g. Customer will be back in 10 min…"></textarea>
+        </div>
+      </div>
+
+      <!-- Step 2: Code display -->
+      <div id="holdCodeSection" style="padding:20px;display:none;flex-direction:column;gap:14px;">
+        <div
+          style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--success-50);border:1px solid #A7F3D0;border-radius:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success-700)" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span style="font-size:13px;font-weight:600;color:var(--success-700);">Order held successfully · cart
+            cleared</span>
+        </div>
+        <div style="background:#3D55CC;border-radius:14px;padding:20px 24px;text-align:center;">
+          <div
+            style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:8px;">
+            Hold Code</div>
+          <div id="holdCodeValue"
+            style="font-size:38px;font-weight:800;letter-spacing:0.22em;color:#fff;font-variant-numeric:tabular-nums;line-height:1;">
+            A7K2M9</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:10px;">Share this code with the customer to
+            retrieve their order</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div
+            style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--gray-100);border-radius:999px;font-size:11px;font-weight:500;color:var(--gray-600);">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span id="holdTimeLabel">Just now · expires in 24h</span>
+          </div>
+          <div
+            style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--gray-100);border-radius:999px;font-size:11px;font-weight:500;color:var(--gray-600);">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span id="holdStaffLabel">Staff</span>
+          </div>
+          <div
+            style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--brand-50);border-radius:999px;font-size:11px;font-weight:600;color:var(--brand-700);">
+            <span id="holdReasonLabel">Customer adding items</span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style="padding:14px 20px;border-top:1px solid var(--border);background:var(--gray-50);display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-secondary" id="holdModalCancel">Cancel</button>
+        <button class="btn btn-primary" id="holdModalConfirm" style="gap:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Hold Order
+        </button>
+        <button class="btn btn-primary" id="holdModalDone" style="display:none;background:var(--success-500);gap:8px;">
+          Done · New Order
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Retrieve Held Order Modal ============ -->
+  <div class="scrim" id="retrieveScrim">
+    <div id="retrieveModal"
+      style="width:500px;max-width:calc(100vw - 32px);background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-lg);animation:slideup 200ms ease;display:flex;flex-direction:column;max-height:82vh;">
+      <div class="modal-head" style="border-bottom:1px solid var(--border);">
+        <div class="thumb" style="background:var(--brand-50);color:var(--brand-600);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 1 0 .49-3.87" />
+          </svg>
+        </div>
+        <div>
+          <h3>Retrieve Held Order</h3>
+          <div class="sub">Enter hold code or search by customer name / phone</div>
+        </div>
+        <button class="close-x" id="retrieveModalClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);">
+        <div style="position:relative;">
+          <span
+            style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray-400);display:flex;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </span>
+          <input id="retrieveSearch" type="text" class="input"
+            placeholder="Hold code (e.g. A7K2M9) or customer name / phone…" style="padding-left:38px;"
+            autocomplete="off" />
+        </div>
+      </div>
+      <div id="retrieveResults" class="scroll" style="flex:1;overflow-y:auto;padding:10px 10px 4px;"></div>
+      <div id="retrieveEmpty"
+        style="padding:40px 24px;text-align:center;color:var(--gray-500);flex-direction:column;align-items:center;gap:10px;display:flex;">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.4"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
         </svg>
-      </div>
-      <div style="flex: 1;">
-        <h3 style="margin: 0 0 2px; font-size: 16px; font-weight: 700; color: var(--gray-900);">Select Store</h3>
-        <div class="sub" style="font-size: 12px; color: var(--gray-500);">Identify store to start transaction</div>
-      </div>
-      <button class="close-x" id="storeSelectClose" style="display: none;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div style="padding: 16px 20px 24px;">
-      <div class="store-grid-container" id="storeListContainer">
-        <!-- populated dynamically -->
+        <div>
+          <div style="font-size:15px;font-weight:600;color:var(--gray-700);margin-bottom:4px;" id="retrieveEmptyTitle">
+            No active held orders</div>
+          <div style="font-size:13px;" id="retrieveEmptyMsg">Hold orders appear here once created.</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- toast -->
-<div class="toast" id="toast">
-  <span class="toast-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-  <span id="toastMsg">Added to order</span>
-</div>
+  <!-- toast -->
+  <div class="toast" id="toast">
+    <span class="toast-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12" />
+      </svg></span>
+    <span id="toastMsg">Added to order</span>
+  </div>
 
-<script src="order-data.js"></script>
-<script src="order-app.js"></script>
+  <script src="order-data.js"></script>
+  <script src="hold-order-app.js"></script>
+  <script src="order-app.js"></script>
 </body>
+
 </html>

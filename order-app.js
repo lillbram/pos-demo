@@ -585,12 +585,7 @@
 
   $('#holdBtn').addEventListener('click', () => {
     if (!state.cart.length) return;
-    flash('Order placed on hold');
-    state.cart = [];
-    state.promo = null;
-    $('#appliedPromo').classList.remove('show');
-    $('#promoForm').style.display = '';
-    renderCart();
+    openHoldModal();
   });
 
   // ============ Payment & order-type ============
@@ -619,7 +614,7 @@
       e.preventDefault();
       $('#searchInput').focus();
     }
-    if (e.key === 'Escape') { closeVariantModal(); closeCustomerModal(); closeCheckout(); }
+    if (e.key === 'Escape') { closeVariantModal(); closeCustomerModal(); closeCheckout(); closeHoldModal(); closeRetrieveModal(); }
   });
 
   // Sidebar nav clicks (mock: only Order is active, others show toast)
@@ -1698,9 +1693,241 @@
     }
   }
 
+
+  // ============ Hold Order Modal ============
+  function updateHoldBadge() {
+    if (!window.HoldOrderLib) return;
+    const count = window.HoldOrderLib.getActiveHolds().length;
+    const badge = $('#holdBadge');
+    if (badge) {
+      badge.textContent = count;
+      badge.style.display = count > 0 ? '' : 'none';
+    }
+  }
+
+  function openHoldModal() {
+    $('#holdFormSection').style.display = 'flex';
+    $('#holdCodeSection').style.display = 'none';
+    $('#holdModalConfirm').style.display = '';
+    $('#holdModalCancel').style.display = '';
+    $('#holdModalDone').style.display = 'none';
+    $('#holdNotes').value = '';
+    $('#holdReason').value = 'customer_adding';
+    $('#holdScrim').classList.add('show');
+    setTimeout(() => { const r = $('#holdReason'); if (r) r.focus(); }, 100);
+  }
+
+  function closeHoldModal() {
+    const scrim = $('#holdScrim');
+    if (scrim) scrim.classList.remove('show');
+  }
+
+  function doHoldOrder() {
+    if (!window.HoldOrderLib) { flash('Hold library not loaded', true); return; }
+    const reason = $('#holdReason').value;
+    const notes = $('#holdNotes').value.trim();
+    const t = getTotals();
+    const currentUser = JSON.parse(localStorage.getItem('pos_current_user')) || { name: 'Staff' };
+    const activeStore = sessionStorage.getItem('pos_active_store') || 'Store #04';
+
+    const record = window.HoldOrderLib.saveHold({
+      orderId: 'A-' + orderCounter,
+      reason,
+      notes,
+      staffName: currentUser.name,
+      store: activeStore,
+      customer: state.customer ? { ...state.customer } : null,
+      cart: state.cart.map(l => ({ ...l })),
+      promo: state.promo ? { ...state.promo } : null,
+      orderType: state.orderType,
+      payment: state.payment,
+      totals: t,
+    });
+
+    // Transition to code display
+    $('#holdFormSection').style.display = 'none';
+    $('#holdCodeSection').style.display = 'flex';
+    $('#holdModalConfirm').style.display = 'none';
+    $('#holdModalCancel').style.display = 'none';
+    $('#holdModalDone').style.display = '';
+    $('#holdCodeValue').textContent = record.holdCode;
+    $('#holdTimeLabel').textContent = 'Held just now · expires in 24h';
+    $('#holdStaffLabel').textContent = currentUser.name;
+    if (window.HoldOrderLib) $('#holdReasonLabel').textContent = window.HoldOrderLib.reasonLabel(reason);
+
+    // Clear the cart
+    state.cart = [];
+    state.promo = null;
+    state.customer = null;
+    $('#appliedPromo').classList.remove('show');
+    $('#promoForm').style.display = '';
+    renderCart();
+    renderCustomerBar();
+    updateHoldBadge();
+    flash(`Order held · Code: ${record.holdCode}`);
+  }
+
+  if ($('#holdModalConfirm')) $('#holdModalConfirm').addEventListener('click', doHoldOrder);
+  if ($('#holdModalCancel'))  $('#holdModalCancel').addEventListener('click', closeHoldModal);
+  if ($('#holdModalClose'))   $('#holdModalClose').addEventListener('click', closeHoldModal);
+  if ($('#holdModalDone'))    $('#holdModalDone').addEventListener('click', closeHoldModal);
+  if ($('#holdScrim'))        $('#holdScrim').addEventListener('click', (e) => { if (e.target.id === 'holdScrim') closeHoldModal(); });
+  const _rBtn = $('#retrieveBtn');
+  if (_rBtn) _rBtn.addEventListener('click', openRetrieveModal);
+
+  // ============ Retrieve Held Order Modal ============
+  function openRetrieveModal() {
+    const s = $('#retrieveSearch');
+    if (s) s.value = '';
+    renderHoldResults(window.HoldOrderLib ? window.HoldOrderLib.getActiveHolds() : []);
+    $('#retrieveScrim').classList.add('show');
+    setTimeout(() => { const s2 = $('#retrieveSearch'); if (s2) s2.focus(); }, 100);
+  }
+
+  function closeRetrieveModal() {
+    const scrim = $('#retrieveScrim');
+    if (scrim) scrim.classList.remove('show');
+  }
+
+  function renderHoldResults(holds) {
+    const container = $('#retrieveResults');
+    const emptyEl   = $('#retrieveEmpty');
+    if (!container || !emptyEl) return;
+    container.innerHTML = '';
+
+    if (!holds || !holds.length) {
+      const q = (($('#retrieveSearch') || {}).value || '').trim();
+      const tEl = $('#retrieveEmptyTitle'), mEl = $('#retrieveEmptyMsg');
+      if (tEl) tEl.textContent = q ? 'No matching held orders' : 'No active held orders';
+      if (mEl) mEl.textContent = q ? 'Try a different code or customer name / phone.' : 'Hold orders appear here once an order is held.';
+      emptyEl.style.display = 'flex';
+      return;
+    }
+    emptyEl.style.display = 'none';
+
+    holds.forEach(h => {
+      const lib = window.HoldOrderLib;
+      const duration    = lib ? lib.holdDuration(h.heldAt) : '?';
+      const itemCount   = h.cart ? h.cart.reduce((s, l) => s + l.qty, 0) : 0;
+      const customerName = h.customer ? h.customer.name : 'Walk-in';
+      const fmtAmt = n => 'Rp ' + Math.round(n || 0).toLocaleString('en-US');
+      const reasonText  = lib ? lib.reasonLabel(h.reason) : h.reason;
+
+      const div = document.createElement('div');
+      div.className = 'hold-result-row';
+      div.innerHTML = `
+        <div class="hold-result-left">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+            <span class="hold-result-code">${h.holdCode}</span>
+            <span style="font-size:11px;color:var(--gray-500);">${duration} ago</span>
+            <span class="hold-result-reason">${reasonText}</span>
+          </div>
+          <div style="font-size:14px;font-weight:600;color:var(--gray-900);">${customerName}</div>
+          <div style="font-size:12px;color:var(--gray-500);margin-top:2px;">${itemCount} item${itemCount !== 1 ? 's' : ''} &middot; ${fmtAmt(h.totals ? h.totals.grand : 0)} &middot; ${h.store}</div>
+          ${h.notes ? `<div style="font-size:11px;color:var(--gray-500);margin-top:3px;font-style:italic;">&ldquo;${h.notes}&rdquo;</div>` : ''}
+        </div>
+        <div>
+          <button class="btn btn-primary btn-sm load-hold-btn" data-code="${h.holdCode}" style="white-space:nowrap;gap:6px;">
+            Load to Cart
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>`;
+      div.querySelector('.load-hold-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        loadHoldToCart(h.holdCode);
+      });
+      div.addEventListener('click', () => loadHoldToCart(h.holdCode));
+      container.appendChild(div);
+    });
+  }
+
+  function searchHolds(query) {
+    if (!window.HoldOrderLib) { renderHoldResults([]); return; }
+    const q = query.trim();
+    const upper = q.toUpperCase();
+    let results;
+    if (q.length === 6 && /^[A-Z0-9]+$/i.test(q)) {
+      const exact = window.HoldOrderLib.findByCode(upper);
+      results = exact ? [exact] : window.HoldOrderLib.findByCustomer(q);
+    } else if (q.length >= 2) {
+      results = window.HoldOrderLib.findByCustomer(q);
+      if (!results.length) {
+        results = window.HoldOrderLib.getActiveHolds().filter(h => h.holdCode.startsWith(upper));
+      }
+    } else if (q.length === 0) {
+      results = window.HoldOrderLib.getActiveHolds();
+    } else {
+      results = [];
+    }
+    renderHoldResults(results);
+  }
+
+  function loadHoldToCart(holdCode) {
+    if (!window.HoldOrderLib) return;
+    const hold = window.HoldOrderLib.findByCode(holdCode);
+    if (!hold) { flash('Hold order not found', true); return; }
+
+    if (state.cart.length > 0) {
+      if (!confirm('Loading a held order will replace your current cart. Continue?')) return;
+    }
+
+    state.cart      = hold.cart ? hold.cart.map(l => ({ ...l })) : [];
+    state.promo     = hold.promo ? { ...hold.promo } : null;
+    state.customer  = hold.customer ? { ...hold.customer } : null;
+    state.orderType = hold.orderType || 'dinein';
+    state.payment   = hold.payment   || 'cash';
+
+    // Restore promo UI
+    if (state.promo) {
+      $('#promoCode').textContent = state.promo.code;
+      $('#appliedPromo').classList.add('show');
+      $('#promoForm').style.display = 'none';
+    } else {
+      $('#appliedPromo').classList.remove('show');
+      $('#promoForm').style.display = '';
+    }
+    // Restore order type UI
+    $$('.order-type button').forEach(b => b.classList.toggle('active', b.dataset.type === state.orderType));
+    // Restore payment UI
+    $$('.pay-btn').forEach(b => b.classList.toggle('active', b.dataset.pay === state.payment));
+
+    window.HoldOrderLib.completeHold(holdCode);
+    updateHoldBadge();
+    renderCart();
+    renderCustomerBar();
+    closeRetrieveModal();
+    const total = state.cart.reduce((s, l) => s + l.qty, 0);
+    flash(`Hold ${holdCode} loaded · ${total} item${total !== 1 ? 's' : ''} restored`);
+  }
+
+  if ($('#retrieveModalClose')) $('#retrieveModalClose').addEventListener('click', closeRetrieveModal);
+  if ($('#retrieveScrim'))      $('#retrieveScrim').addEventListener('click', (e) => { if (e.target.id === 'retrieveScrim') closeRetrieveModal(); });
+  if ($('#retrieveSearch')) {
+    $('#retrieveSearch').addEventListener('input', (e) => searchHolds(e.target.value));
+    $('#retrieveSearch').addEventListener('keydown', (e) => { if (e.key === 'Escape') closeRetrieveModal(); });
+  }
+
   // ============ Init ============
   initStoreSelection();
   renderCats();
   renderCart();
   renderCustomerBar();
+  updateHoldBadge();
+
+  // Auto-retrieve if navigated from the held-orders dashboard
+  const _autoCode = sessionStorage.getItem('pos_retrieve_code');
+  if (_autoCode) {
+    sessionStorage.removeItem('pos_retrieve_code');
+    setTimeout(() => {
+      if (window.HoldOrderLib && window.HoldOrderLib.findByCode(_autoCode)) {
+        loadHoldToCart(_autoCode);
+      } else {
+        openRetrieveModal();
+        setTimeout(() => {
+          const s = $('#retrieveSearch');
+          if (s) { s.value = _autoCode; searchHolds(_autoCode); }
+        }, 150);
+      }
+    }, 600);
+  }
 })();
